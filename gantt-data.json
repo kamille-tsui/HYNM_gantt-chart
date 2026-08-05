@@ -6,15 +6,105 @@
     "endDate": "2026-09-30"
   },
   "tasks": [
-    { "id": 1, "phase": "启动阶段", "name": "项目立项", "owner": "张三", "start": "2026-08-01", "duration": 3, "progress": 100, "color": "#4CAF50" },
-    { "id": 2, "phase": "启动阶段", "name": "需求调研", "owner": "李四", "start": "2026-08-04", "duration": 5, "progress": 80, "color": "#4CAF50" },
-    { "id": 3, "phase": "设计阶段", "name": "UI设计", "owner": "王五", "start": "2026-08-09", "duration": 7, "progress": 40, "color": "#2196F3" },
-    { "id": 4, "phase": "设计阶段", "name": "架构设计", "owner": "赵六", "start": "2026-08-09", "duration": 5, "progress": 60, "color": "#2196F3" },
-    { "id": 5, "phase": "开发阶段", "name": "前端开发", "owner": "王五", "start": "2026-08-16", "duration": 10, "progress": 10, "color": "#FF9800" },
-    { "id": 6, "phase": "开发阶段", "name": "后端开发", "owner": "赵六", "start": "2026-08-16", "duration": 12, "progress": 5, "color": "#FF9800" },
-    { "id": 7, "phase": "测试阶段", "name": "集成测试", "owner": "李四", "start": "2026-08-28", "duration": 5, "progress": 0, "color": "#9C27B0" },
-    { "id": 8, "phase": "测试阶段", "name": "验收测试", "owner": "张三", "start": "2026-09-02", "duration": 5, "progress": 0, "color": "#9C27B0" },
-    { "id": 9, "phase": "上线阶段", "name": "部署上线", "owner": "赵六", "start": "2026-09-07", "duration": 3, "progress": 0, "color": "#F44336" },
-    { "id": 10, "phase": "上线阶段", "name": "项目总结", "owner": "张三", "start": "2026-09-10", "duration": 5, "progress": 0, "color": "#F44336" }
+    {
+      "id": 1,
+      "phase": "启动阶段",
+      "name": "项目立项",
+      "owner": "张三",
+      "start": "2026-08-01",
+      "duration": 3,
+      "progress": 100,
+      "color": "#4CAF50"
+    },
+    {
+      "id": 2,
+      "phase": "启动阶段",
+      "name": "需求调研",
+      "owner": "李四",
+      "start": "2026-08-04",
+      "duration": 5,
+      "progress": 80,
+      "color": "#4CAF50"
+    },
+    {
+      "id": 3,
+      "phase": "设计阶段",
+      "name": "UI设计",
+      "owner": "王五",
+      "start": "2026-08-09",
+      "duration": 7,
+      "progress": 40,
+      "color": "#2196F3"
+    },
+    {
+      "id": 4,
+      "phase": "设计阶段",
+      "name": "架构设计",
+      "owner": "赵六",
+      "start": "2026-08-09",
+      "duration": 5,
+      "progress": 60,
+      "color": "#2196F3"
+    },
+    {
+      "id": 5,
+      "phase": "开发阶段",
+      "name": "前端开发",
+      "owner": "王五",
+      "start": "2026-08-16",
+      "duration": 10,
+      "progress": 10,
+      "color": "#FF9800"
+    },
+    {
+      "id": 6,
+      "phase": "开发阶段",
+      "name": "后端开发",
+      "owner": "赵六",
+      "start": "2026-08-16",
+      "duration": 12,
+      "progress": 5,
+      "color": "#FF9800"
+    },
+    {
+      "id": 7,
+      "phase": "测试阶段",
+      "name": "集成测试",
+      "owner": "李四",
+      "start": "2026-08-28",
+      "duration": 5,
+      "progress": 0,
+      "color": "#9C27B0"
+    },
+    {
+      "id": 8,
+      "phase": "测试阶段",
+      "name": "验收测试",
+      "owner": "张三",
+      "start": "2026-09-02",
+      "duration": 5,
+      "progress": 0,
+      "color": "#9C27B0"
+    },
+    {
+      "id": 9,
+      "phase": "上线阶段",
+      "name": "部署上线",
+      "owner": "赵六",
+      "start": "2026-09-07",
+      "duration": 3,
+      "progress": 0,
+      "color": "#F44336"
+    },
+    {
+      "id": 10,
+      "phase": "上线阶段",
+      "name": "项目总结",
+      "owner": "张三",
+      "start": "2026-09-10",
+      "duration": 5,
+      "progress": 0,
+      "color": "#F44336"
+    }
   ]
 }
