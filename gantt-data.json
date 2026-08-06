@@ -113,8 +113,18 @@
       "owner": "未分配",
       "start": "2026-08-06",
       "duration": 5,
-      "progress": 45,
+      "progress": 50,
       "color": "#4CAF50"
+    },
+    {
+      "id": 12,
+      "phase": "开发阶段",
+      "name": "测试任务_L",
+      "owner": "文",
+      "start": "2026-08-06",
+      "duration": 5,
+      "progress": 50,
+      "color": "#F44336"
     }
   ]
 }
