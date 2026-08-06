@@ -105,6 +105,16 @@
       "duration": 8,
       "progress": 36,
       "color": "#F44336"
+    },
+    {
+      "id": 11,
+      "phase": "开发阶段",
+      "name": "烧结",
+      "owner": "蔡",
+      "start": "2026-08-06",
+      "duration": 5,
+      "progress": 18,
+      "color": "#4CAF50"
     }
   ]
 }
