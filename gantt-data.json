@@ -105,6 +105,16 @@
       "duration": 5,
       "progress": 0,
       "color": "#F44336"
+    },
+    {
+      "id": 11,
+      "phase": "开发阶段",
+      "name": "烧结",
+      "owner": "未分配",
+      "start": "2026-08-06",
+      "duration": 5,
+      "progress": 0,
+      "color": "#4CAF50"
     }
   ]
 }
