@@ -63,7 +63,7 @@
       "owner": "赵六",
       "start": "2026-08-16",
       "duration": 12,
-      "progress": 92,
+      "progress": 5,
       "color": "#FF9800"
     },
     {
@@ -105,6 +105,26 @@
       "duration": 5,
       "progress": 0,
       "color": "#F44336"
+    },
+    {
+      "id": 11,
+      "phase": "开发阶段",
+      "name": "烧结",
+      "owner": "蔡",
+      "start": "2026-08-06",
+      "duration": 5,
+      "progress": 0,
+      "color": "#00BCD4"
+    },
+    {
+      "id": 12,
+      "phase": "开发阶段",
+      "name": "涂层",
+      "owner": "蔡",
+      "start": "2026-08-12",
+      "duration": 2,
+      "progress": 0,
+      "color": "#9C27B0"
     }
   ]
 }
