@@ -25,6 +25,26 @@
       "duration": 12,
       "progress": 56,
       "color": "#2196F3"
+    },
+    {
+      "id": 13,
+      "phase": "测试阶段",
+      "name": "任务M",
+      "owner": "Tsui",
+      "start": "2026-08-10",
+      "duration": 6,
+      "progress": 65,
+      "color": "#FF9800"
+    },
+    {
+      "id": 14,
+      "phase": "上线阶段",
+      "name": "任务N",
+      "owner": "Tsui",
+      "start": "2026-08-25",
+      "duration": 9,
+      "progress": 80,
+      "color": "#9C27B0"
     }
   ]
 }
