@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>📊 HYNM项目管理在线甘特图</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -21,10 +21,12 @@
     justify-content: space-between;
     align-items: center;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    gap: 12px;
+    flex-wrap: wrap;
   }
   .header h1 { font-size: 24px; font-weight: 600; }
   .header .info { font-size: 14px; opacity: 0.9; }
-  .header .actions { display: flex; gap: 10px; align-items: center; }
+  .header .actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
   .btn {
     padding: 8px 16px;
     border: none;
@@ -160,6 +162,7 @@
     overflow: auto;
     background: #fff;
     padding: 20px;
+    -webkit-overflow-scrolling: touch;
   }
   .gantt-header-row { display: flex; margin-bottom: 5px; }
   .gantt-task-label-header {
@@ -403,7 +406,6 @@
   .github-config p { color: #856404; line-height: 1.6; }
   .github-config code { background: #fff; padding: 1px 5px; border-radius: 3px; font-family: monospace; }
 
-  /* 调试信息 */
   .debug-info {
     font-size: 11px;
     color: #999;
@@ -411,57 +413,115 @@
     font-family: monospace;
   }
 
-  /* ===== 密码遮罩 ===== */
-  .pwd-overlay {
+  /* ===== 密码门 ===== */
+  #pwdOverlay {
     position: fixed; inset: 0; z-index: 200;
     background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
-    display: flex; justify-content: center; align-items: center;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
   }
-  .pwd-box {
-    background: #fff; border-radius: 14px; padding: 32px 30px;
-    width: 380px; max-width: 92vw; box-shadow: 0 12px 40px rgba(0,0,0,0.25);
-    text-align: center;
+  #pwdBox {
+    background: #fff; border-radius: 14px; padding: 30px 26px;
+    width: 380px; max-width: 100%;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.25); text-align: center;
   }
-  .pwd-box h2 { font-size: 20px; color: #1a73e8; margin-bottom: 6px; }
-  .pwd-box p.sub { font-size: 13px; color: #888; margin-bottom: 20px; }
-  .pwd-box input[type="password"] {
-    width: 100%; padding: 10px 14px; font-size: 15px;
+  #pwdBox h2 { font-size: 20px; color: #1a73e8; margin-bottom: 8px; }
+  #pwdBox p.sub { font-size: 13px; color: #888; margin-bottom: 20px; }
+  #pwdBox input[type="password"] {
+    width: 100%; padding: 11px 14px; font-size: 15px;
     border: 1px solid #ddd; border-radius: 8px; margin-bottom: 14px;
   }
-  .pwd-box input[type="password"]:focus { outline: none; border-color: #1a73e8; }
-  .pwd-box .btn-success { width: 100%; padding: 10px; font-size: 15px; }
-  .pwd-err { color: #d93025; font-size: 13px; margin-top: 10px; min-height: 18px; }
+  #pwdBox input[type="password"]:focus { outline: none; border-color: #1a73e8; }
+  #pwdBox button {
+    width: 100%; padding: 11px; font-size: 15px; font-weight: 600;
+    border: none; border-radius: 8px; cursor: pointer;
+    background: #1a73e8; color: #fff; transition: background 0.2s;
+  }
+  #pwdBox button:hover { background: #1558b0; }
+  #pwdMsg { font-size: 13px; margin-top: 12px; min-height: 18px; }
+  #pwdMsg.err { color: #d93025; }
+  #pwdMsg.info { color: #1a73e8; }
+
+  /* ===== 手机端适配（≤900px） ===== */
+  .menu-toggle { display: none; }
+  @media (max-width: 900px) {
+    .header { padding: 14px 16px; }
+    .header h1 { font-size: 18px; }
+    .header .info { font-size: 12px; width: 100%; order: 3; }
+    .header .actions { gap: 6px; }
+    .btn { padding: 7px 10px; font-size: 12px; }
+    .btn-sm { padding: 6px 9px; font-size: 11px; }
+    .toolbar { padding: 10px 14px; gap: 8px; }
+    .toolbar label { font-size: 12px; }
+    .toolbar input, .toolbar select { font-size: 12px; padding: 5px 8px; }
+    .toolbar > label[for="searchInput"] { display:none; }
+    .toolbar #searchInput { flex: 1 1 100%; order: -1; }
+    .stats-row { gap: 8px; }
+    .stat-card { padding: 10px 8px; }
+    .stat-card .stat-value { font-size: 18px; }
+    .stat-card .stat-label { font-size: 11px; }
+
+    /* 主区：上下堆叠，左侧栏变可折叠抽屉 */
+    .main-container { flex-direction: column; height: auto; min-height: calc(100vh - 120px); }
+    .menu-toggle {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 6px 12px; font-size: 13px; font-weight: 600;
+      background: #1a73e8; color: #fff; border: none; border-radius: 6px;
+      cursor: pointer; margin-bottom: 10px;
+    }
+    .menu-toggle .dot { display:inline-block; width:6px; height:6px; background:#fff; border-radius:50%; margin-right:6px; }
+    .sidebar {
+      width: 100%; min-width: 0; border-right: none; border-bottom: 1px solid #e0e0e0;
+      max-height: none; padding: 12px 14px;
+    }
+    .sidebar.collapsed .sidebar-body { display: none; }
+    .gantt-area { padding: 12px; }
+    .gantt-task-label, .gantt-task-label-header { width: 110px; min-width: 110px; font-size: 11px; }
+    .gantt-bar-label { font-size: 10px; padding: 0 5px; }
+    .modal { padding: 18px; }
+    .modal h2 { font-size: 16px; margin-bottom: 14px; }
+  }
+  @media (max-width: 560px) {
+    .header h1 { font-size: 16px; }
+    .header .actions .btn span.lbl { display:none; }
+    .header .actions .btn { padding: 6px 8px; }
+    .stats-row { flex-wrap: wrap; }
+    .stat-card { flex: 1 1 45%; }
+    .gantt-task-label, .gantt-task-label-header { width: 90px; min-width: 90px; }
+    .gantt-day-header { width: 24px; min-width: 24px; }
+    .gantt-day-header .day-name { display:none; }
+  }
 </style>
 </head>
 <body>
 
-<!-- 密码遮罩 -->
-<div class="pwd-overlay" id="pwdOverlay">
-  <div class="pwd-box">
-    <h2>🔒 访问受限</h2>
-    <p class="sub">请输入访问密码以查看甘特图</p>
-    <input type="password" id="pwdInput" placeholder="请输入密码" autocomplete="current-password">
-    <button class="btn btn-success" onclick="submitPassword()">确 认</button>
-    <div class="pwd-err" id="pwdErr"></div>
+<!-- 密码门遮罩 -->
+<div id="pwdOverlay">
+  <div id="pwdBox">
+    <h2>🔒 HYNM 甘特图</h2>
+    <p class="sub">请输入访问密码以查看项目甘特图</p>
+    <input type="password" id="pwdInput" placeholder="访问密码" autocomplete="off" autofocus>
+    <button id="pwdSubmit">进入甘特图</button>
+    <div id="pwdMsg"></div>
   </div>
 </div>
 
-<div class="header" id="mainHeader" style="display:none;">
+<div class="header">
   <div>
     <h1>📊 HYNM项目管理在线甘特图</h1>
     <div class="info" id="projectInfo"></div>
   </div>
   <div class="actions">
-    <button class="btn btn-warning btn-sm" onclick="logout()">🔓 退出</button>
-    <button class="btn btn-warning btn-sm" onclick="showConfig()">⚙️ 配置</button>
-    <button class="btn btn-success btn-sm" onclick="saveToGitHub()">💾 保存修改并上传</button>
-    <button class="btn btn-primary btn-sm" onclick="exportJSON()">📥 导出JSON数据</button>
-    <button class="btn btn-primary btn-sm" onclick="importJSON()">📤 导入JSON数据</button>
+    <button class="btn btn-warning btn-sm" onclick="showConfig()">⚙️ <span class="lbl">配置</span></button>
+    <button class="btn btn-success btn-sm" onclick="saveToGitHub()">💾 <span class="lbl">保存修改并上传</span></button>
+    <button class="btn btn-primary btn-sm" onclick="exportJSON()">📥 <span class="lbl">导出</span></button>
+    <button class="btn btn-primary btn-sm" onclick="importJSON()">📤 <span class="lbl">导入</span></button>
+    <button class="btn btn-sm" style="background:#fff3cd;color:#856404;" onclick="logoutPwd()">🔓 <span class="lbl">退出</span></button>
   </div>
 </div>
 
-<div class="toolbar" id="mainToolbar" style="display:none;">
-  <label>搜索：</label>
+<div class="toolbar">
+  <label for="searchInput">搜索：</label>
   <input type="text" id="searchInput" placeholder="搜索任务名称..." oninput="renderGantt()">
   <label>阶段筛选：</label>
   <select id="phaseFilter" onchange="renderGantt()">
@@ -476,79 +536,81 @@
   <span style="margin-left:auto; font-size:12px; color:#888;" id="lastUpdated"></span>
 </div>
 
-<div class="main-container" id="mainContainer" style="display:none;">
-  <div class="sidebar">
-    <div id="githubStatus"></div>
+<div class="main-container">
+  <div class="sidebar" id="sidebar">
+    <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()"><span class="dot"></span><span id="menuToggleTxt">收起面板</span></button>
+    <div class="sidebar-body" id="sidebarBody">
+      <div id="githubStatus"></div>
 
-    <h3>📈 项目统计</h3>
-    <div class="stats-row" style="flex-direction:column; gap:8px;">
-      <div class="stat-card" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px;">
-        <span class="stat-label" style="margin:0;">总任务数</span>
-        <span class="stat-value" id="statTotal" style="font-size:20px;">0</span>
+      <h3>📈 项目统计</h3>
+      <div class="stats-row" style="flex-direction:column; gap:8px;">
+        <div class="stat-card" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px;">
+          <span class="stat-label" style="margin:0;">总任务数</span>
+          <span class="stat-value" id="statTotal" style="font-size:20px;">0</span>
+        </div>
+        <div class="stat-card" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px;">
+          <span class="stat-label" style="margin:0;">已完成</span>
+          <span class="stat-value" id="statDone" style="font-size:20px; color:#34a853;">0</span>
+        </div>
+        <div class="stat-card" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px;">
+          <span class="stat-label" style="margin:0;">进行中</span>
+          <span class="stat-value" id="statProgress" style="font-size:20px; color:#ff9800;">0</span>
+        </div>
+        <div class="stat-card" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px;">
+          <span class="stat-label" style="margin:0;">整体进度</span>
+          <span class="stat-value" id="statPercent" style="font-size:20px; color:#ff9800;">0%</span>
+        </div>
       </div>
-      <div class="stat-card" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px;">
-        <span class="stat-label" style="margin:0;">已完成</span>
-        <span class="stat-value" id="statDone" style="font-size:20px; color:#34a853;">0</span>
+
+      <h3 style="margin-top:20px;">➕ 添加任务</h3>
+      <div class="task-form" id="taskForm">
+        <div class="form-group">
+          <label>任务名称 *</label>
+          <input type="text" id="f_name" placeholder="输入任务名称">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>所属阶段</label>
+            <input type="text" id="f_phase" placeholder="如：开发阶段" value="开发阶段">
+          </div>
+          <div class="form-group">
+            <label>负责人</label>
+            <input type="text" id="f_owner" placeholder="负责人">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>开始日期 *</label>
+            <input type="date" id="f_start">
+          </div>
+          <div class="form-group">
+            <label>持续天数 *</label>
+            <input type="number" id="f_duration" placeholder="天数" min="1" value="5">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>完成进度：<span id="f_progress_val">0</span>%</label>
+          <input type="range" id="f_progress" min="0" max="100" value="0" oninput="document.getElementById('f_progress_val').textContent=this.value">
+        </div>
+        <div class="form-group">
+          <label>颜色</label>
+          <select id="f_color">
+            <option value="#4CAF50">绿色</option>
+            <option value="#2196F3">蓝色</option>
+            <option value="#FF9800">橙色</option>
+            <option value="#9C27B0">紫色</option>
+            <option value="#F44336">红色</option>
+            <option value="#00BCD4">青色</option>
+          </select>
+        </div>
+        <button class="btn btn-success" style="width:100%;" onclick="addTask()">添加任务</button>
+        <div class="debug-info" id="debugAdd"></div>
       </div>
-      <div class="stat-card" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px;">
-        <span class="stat-label" style="margin:0;">进行中</span>
-        <span class="stat-value" id="statProgress" style="font-size:20px; color:#ff9800;">0</span>
-      </div>
-      <div class="stat-card" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px;">
-        <span class="stat-label" style="margin:0;">整体进度</span>
-        <span class="stat-value" id="statPercent" style="font-size:20px; color:#ff9800;">0%</span>
-      </div>
+
+      <h3>📋 任务列表</h3>
+      <div class="task-list" id="taskList"></div>
     </div>
-
-    <h3 style="margin-top:20px;">➕ 添加任务</h3>
-    <div class="task-form" id="taskForm">
-      <div class="form-group">
-        <label>任务名称 *</label>
-        <input type="text" id="f_name" placeholder="输入任务名称">
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>所属阶段</label>
-          <input type="text" id="f_phase" placeholder="如：开发阶段" value="开发阶段">
-        </div>
-        <div class="form-group">
-          <label>负责人</label>
-          <input type="text" id="f_owner" placeholder="负责人">
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>开始日期 *</label>
-          <input type="date" id="f_start">
-        </div>
-        <div class="form-group">
-          <label>持续天数 *</label>
-          <input type="number" id="f_duration" placeholder="天数" min="1" value="5">
-        </div>
-      </div>
-      <div class="form-group">
-        <label>完成进度：<span id="f_progress_val">0</span>%</label>
-        <input type="range" id="f_progress" min="0" max="100" value="0" oninput="document.getElementById('f_progress_val').textContent=this.value">
-      </div>
-      <div class="form-group">
-        <label>颜色</label>
-        <select id="f_color">
-          <option value="#4CAF50">绿色</option>
-          <option value="#2196F3">蓝色</option>
-          <option value="#FF9800">橙色</option>
-          <option value="#9C27B0">紫色</option>
-          <option value="#F44336">红色</option>
-          <option value="#00BCD4">青色</option>
-        </select>
-      </div>
-      <button class="btn btn-success" style="width:100%;" onclick="addTask()">添加任务</button>
-      <div class="debug-info" id="debugAdd"></div>
-    </div>
-
-    <h3>📋 任务列表</h3>
-    <div class="task-list" id="taskList"></div>
   </div>
-
   <div class="gantt-area" id="ganttArea"></div>
 </div>
 
@@ -641,9 +703,10 @@
 
 <script>
 // ============================================================
- 
+//  密码门（SHA-256，密码 HYNM2026）
 // ============================================================
 const PASSWORD_HASH = 'e9e2386b6ca004a069463d3223209d8ac62ced2d79425af37ecebae16e3b9362';
+const PWD_STORAGE_KEY = 'gantt_pwd_verified';
 
 async function sha256Hex(str) {
   const buf = new TextEncoder().encode(str);
@@ -652,41 +715,37 @@ async function sha256Hex(str) {
 }
 
 async function submitPassword() {
-  const v = document.getElementById('pwdInput').value;
-  const errEl = document.getElementById('pwdErr');
-  if (!v) { errEl.textContent = '请输入密码'; return; }
-  const h = await sha256Hex(v);
-  if (h === PASSWORD_HASH) {
-    // 验证通过：隐藏遮罩，显示主界面，开始加载数据
+  const input = document.getElementById('pwdInput');
+  const msg = document.getElementById('pwdMsg');
+  const pw = input.value;
+  if (!pw) { msg.className = 'err'; msg.textContent = '请输入密码'; return; }
+  msg.className = 'info'; msg.textContent = '验证中...';
+  const hash = await sha256Hex(pw);
+  if (hash === PASSWORD_HASH) {
+    sessionStorage.setItem(PWD_STORAGE_KEY, '1');
     document.getElementById('pwdOverlay').style.display = 'none';
-    document.getElementById('mainHeader').style.display = 'flex';
-    document.getElementById('mainToolbar').style.display = 'flex';
-    document.getElementById('mainContainer').style.display = 'flex';
-    await loadGanttData();
+    msg.textContent = '';
+    if (typeof init === 'function' && !window.__ganttInited) { window.__ganttInited = true; init(); }
   } else {
-    errEl.textContent = '密码错误，请重试';
-    document.getElementById('pwdInput').value = '';
-    document.getElementById('pwdInput').focus();
+    msg.className = 'err'; msg.textContent = '密码错误，请重试';
+    input.value = ''; input.focus();
   }
 }
-
-function logout() {
-  // 清空数据并回到密码页
-  ganttData = null;
+function logoutPwd() {
+  sessionStorage.removeItem(PWD_STORAGE_KEY);
   document.getElementById('pwdOverlay').style.display = 'flex';
-  document.getElementById('mainHeader').style.display = 'none';
-  document.getElementById('mainToolbar').style.display = 'none';
-  document.getElementById('mainContainer').style.display = 'none';
   document.getElementById('pwdInput').value = '';
-  document.getElementById('pwdErr').textContent = '';
-  document.getElementById('ganttArea').innerHTML = '';
-  document.getElementById('taskList').innerHTML = '';
+  document.getElementById('pwdMsg').textContent = '';
+  document.getElementById('pwdInput').focus();
 }
+document.getElementById('pwdSubmit').addEventListener('click', submitPassword);
+document.getElementById('pwdInput').addEventListener('keydown', e => { if (e.key === 'Enter') submitPassword(); });
 
-// 回车提交密码
-document.getElementById('pwdInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') submitPassword();
-});
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  sb.classList.toggle('collapsed');
+  document.getElementById('menuToggleTxt').textContent = sb.classList.contains('collapsed') ? '展开面板' : '收起面板';
+}
 
 // ============================================================
 //  日期系统 v2 —— 基于 Ordinal（序天数），彻底消除时区问题
@@ -704,15 +763,9 @@ function ordToDateStr(ord) {
 }
 function daysBetween(startStr, endStr) { return dateStrToOrd(endStr) - dateStrToOrd(startStr); }
 function addDaysToStr(dateStr, n) { return ordToDateStr(dateStrToOrd(dateStr) + n); }
-function getDayOfWeek(dateStr) {
-  const [y, m, d] = dateStr.split('-').map(Number);
-  return new Date(Date.UTC(y, m - 1, d)).getUTCDay();
-}
+function getDayOfWeek(dateStr) { const [y, m, d] = dateStr.split('-').map(Number); return new Date(Date.UTC(y, m - 1, d)).getUTCDay(); }
 function getDaysInMonth(year, month) { return new Date(Date.UTC(year, month, 0)).getUTCDate(); }
-function formatDateCN(dateStr) {
-  const [y, m, d] = dateStr.split('-').map(Number);
-  return `${y}年${m}月${d}日`;
-}
+function formatDateCN(dateStr) { const [y, m, d] = dateStr.split('-').map(Number); return `${y}年${m}月${d}日`; }
 function isValidDateStr(s) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
   const [y, m, d] = s.split('-').map(Number);
@@ -738,38 +791,35 @@ const todayStr = getTodayStr();
 const todayOrd = dateStrToOrd(todayStr);
 
 // ============================================================
-//  数据加载（与 saveToGitHub 通路完全对称：均读写明文 JSON）
-//  saveToGitHub 写入 gantt-data.json（JSON.stringify → btoa 供 GitHub API）
-//  本函数 fetch gantt-data.json 后直接 res.json() 解析，格式完全匹配
+//  初始化
 // ============================================================
-async function loadGanttData() {
+async function init() {
   const params = new URLSearchParams(location.search);
   const dataUrl = params.get('data') || 'gantt-data.json';
   try {
     const res = await fetch(dataUrl + '?t=' + Date.now(), { cache: 'no-store' });
-    if (!res.ok) {
-      // 明确暴露 404/其他 HTTP 错误，不再静默回退到默认数据掩盖问题
-      const msg = '无法加载数据文件 ' + dataUrl + ' (HTTP ' + res.status + ')。' +
-        (res.status === 404
-          ? '请确认 gantt-data.json 已上传到仓库根目录，且 GitHub Pages 已开启（Settings → Pages → main / root）。'
-          : '请检查仓库文件与网络。');
-      throw new Error(msg);
-    }
+    if (!res.ok) throw new Error('无法加载数据文件 ' + dataUrl + ' (HTTP ' + res.status + ')。请确认该文件已上传到仓库根目录且 Pages 已开启。');
     ganttData = await res.json();
-    if (!ganttData || !Array.isArray(ganttData.tasks)) throw new Error('数据格式不正确：缺少 tasks 数组');
   } catch (e) {
-    console.error('加载数据失败：', e);
-    // 显示明确错误到页面，便于用户定位"404/文件未上传"问题
-    const area = document.getElementById('ganttArea');
-    if (area) {
-      area.innerHTML = '<div style="color:#d93025;background:#fce8e8;border:1px solid #f5c6cb;' +
-        'padding:16px;border-radius:8px;font-size:14px;line-height:1.7;white-space:pre-wrap;">' +
-        '⚠️ ' + e.message + '</div>';
-    }
-    showStatus('githubStatus', '⚠️ ' + e.message, 'error');
-    ganttData = getDefaultData(); // 仅作为界面兜底，不让页面空白
+    console.warn('加载数据失败：', e);
+    document.getElementById('githubStatus').innerHTML =
+      '<div class="status-msg error">⚠️ ' + e.message + '</div>';
+    ganttData = getDefaultData();
   }
-  loadGitHubConfigUI();
+  const saved = localStorage.getItem('github_config');
+  if (saved) {
+    try {
+      const cfg = JSON.parse(saved);
+      document.getElementById('cfg_owner').value = cfg.owner || '';
+      document.getElementById('cfg_repo').value = cfg.repo || '';
+      document.getElementById('cfg_branch').value = cfg.branch || 'main';
+      document.getElementById('cfg_token').value = cfg.token || '';
+      document.getElementById('cfg_path').value = cfg.path || 'gantt-data.json';
+      showStatus('githubStatus', '✅ GitHub 已配置，可以保存到仓库', 'success');
+    } catch(e) {}
+  } else {
+    showStatus('githubStatus', '⚠️ 未配置 GitHub，数据仅保存在本地。点击右上角「配置GitHub」开启协作功能。', 'info');
+  }
   document.getElementById('f_start').value = todayStr;
   renderAll();
 }
@@ -803,7 +853,6 @@ function renderAll() {
   renderGantt();
   renderLastUpdated();
 }
-
 function renderProjectInfo() {
   const p = ganttData.project;
   document.getElementById('projectInfo').textContent =
@@ -822,79 +871,49 @@ function renderStats() {
 }
 function renderPhaseFilter() {
   const sel = document.getElementById('phaseFilter');
-  const current = sel.value;
-  const phases = [...new Set(ganttData.tasks.map(t => t.phase))];
-  sel.innerHTML = '<option value="">全部阶段</option>' +
-    phases.map(p => `<option value="${p}">${p}</option>`).join('');
-  sel.value = current;
+  const cur = sel.value;
+  const phases = [...new Set(ganttData.tasks.map(t => t.phase))].sort();
+  sel.innerHTML = '<option value="">全部阶段</option>' + phases.map(p => `<option value="${p}">${p}</option>`).join('');
+  sel.value = cur;
 }
 function renderTaskList() {
-  const container = document.getElementById('taskList');
-  const search = document.getElementById('searchInput').value.toLowerCase();
-  const phase = document.getElementById('phaseFilter').value;
-  let tasks = ganttData.tasks.filter(t => {
-    const matchSearch = !search || t.name.toLowerCase().includes(search);
-    const matchPhase = !phase || t.phase === phase;
-    return matchSearch && matchPhase;
-  });
-  container.innerHTML = tasks.map(t => {
-    const endStr = addDaysToStr(t.start, t.duration - 1);
-    return `
-    <div class="task-item ${selectedTaskId === t.id ? 'selected' : ''}" onclick="selectTask(${t.id})" ondblclick="openEdit(${t.id})">
-      <button class="delete-btn" onclick="event.stopPropagation(); deleteTask(${t.id})">✕</button>
+  const list = document.getElementById('taskList');
+  list.innerHTML = ganttData.tasks.map(t => `
+    <div class="task-item${t.id===selectedTaskId?' selected':''}" onclick="selectTask(${t.id})" ondblclick="openEdit(${t.id})">
+      <button class="delete-btn" onclick="event.stopPropagation();deleteTask(${t.id})">✕</button>
       <div class="task-name">${t.name}</div>
-      <div class="task-meta">
-        <span>${t.phase}</span>
-        <span>👤 ${t.owner}</span>
-        <span>📅 ${t.start} ~ ${endStr}</span>
-      </div>
-      <div class="task-progress-bar">
-        <div class="task-progress-fill" style="width:${t.progress}%; background:${t.color};"></div>
-      </div>
-    </div>`;
-  }).join('');
+      <div class="task-meta"><span>${t.owner}</span><span>${t.duration}天</span><span>${t.progress}%</span></div>
+      <div class="task-progress-bar"><div class="task-progress-fill" style="width:${t.progress}%;background:${t.color}"></div></div>
+    </div>`).join('');
 }
 function renderLastUpdated() {
-  document.getElementById('lastUpdated').textContent =
-    '最后更新：' + new Date().toLocaleString('zh-CN');
+  const el = document.getElementById('lastUpdated');
+  if (ganttData && ganttData.lastUpdated) el.textContent = '最后更新：' + ganttData.lastUpdated;
 }
 
 // ============================================================
-//  甘特图核心渲染
+//  甘特图渲染（day / week / month）
 // ============================================================
 function renderGantt() {
   const area = document.getElementById('ganttArea');
   const search = document.getElementById('searchInput').value.toLowerCase();
   const phase = document.getElementById('phaseFilter').value;
   const view = document.getElementById('viewMode').value;
-
   let tasks = ganttData.tasks.filter(t => {
-    const matchSearch = !search || t.name.toLowerCase().includes(search);
-    const matchPhase = !phase || t.phase === phase;
-    return matchSearch && matchPhase;
+    return (!search || t.name.toLowerCase().includes(search)) && (!phase || t.phase === phase);
   });
-
   const phaseOrder = [];
   const phases = {};
-  tasks.forEach(t => {
-    if (!phases[t.phase]) { phases[t.phase] = []; phaseOrder.push(t.phase); }
-    phases[t.phase].push(t);
-  });
-
+  tasks.forEach(t => { if (!phases[t.phase]) { phases[t.phase] = []; phaseOrder.push(t.phase); } phases[t.phase].push(t); });
   let rangeStartOrd, rangeEndOrd;
   if (tasks.length > 0) {
-    const allOrds = tasks.map(t => dateStrToOrd(t.start));
-    rangeStartOrd = Math.min(...allOrds);
-    rangeEndOrd = Math.max(...allOrds);
-    tasks.forEach(t => {
-      const endOrd = dateStrToOrd(t.start) + t.duration - 1;
-      if (endOrd > rangeEndOrd) rangeEndOrd = endOrd;
-    });
+    rangeStartOrd = Math.min(...tasks.map(t => dateStrToOrd(t.start)));
+    rangeEndOrd = Math.max(...tasks.map(t => dateStrToOrd(t.start)));
+    tasks.forEach(t => { const e = dateStrToOrd(t.start) + t.duration - 1; if (e > rangeEndOrd) rangeEndOrd = e; });
   } else {
     rangeStartOrd = dateStrToOrd(ganttData.project.startDate || '2026-01-01');
     rangeEndOrd = dateStrToOrd(ganttData.project.endDate || '2026-12-31');
   }
-
   const dayWidth = 28;
   let html = '';
   const colors = [...new Set(tasks.map(t => t.color))];
@@ -904,132 +923,51 @@ function renderGantt() {
   colors.forEach(c => { html += `<div class="legend-item"><div class="legend-color" style="background:${c}"></div>${colorMap[c]||c}</div>`; });
   html += '<div class="legend-item" style="margin-left:auto;"><div class="legend-color" style="background:#f44336; width:2px; height:14px;"></div>今日</div>';
   html += '</div>';
-
-  if (view === 'month') {
-    html += renderMonthView(phaseOrder, phases, rangeStartOrd, rangeEndOrd, dayWidth);
-  } else if (view === 'week') {
-    html += renderWeekView(phaseOrder, phases, rangeStartOrd, rangeEndOrd, dayWidth);
-  } else {
-    html += renderDayView(phaseOrder, phases, rangeStartOrd, rangeEndOrd, dayWidth);
-  }
+  if (view === 'month') html += renderMonthView(phaseOrder, phases, rangeStartOrd, rangeEndOrd, dayWidth);
+  else if (view === 'week') html += renderWeekView(phaseOrder, phases, rangeStartOrd, rangeEndOrd, dayWidth);
+  else html += renderDayView(phaseOrder, phases, rangeStartOrd, rangeEndOrd, dayWidth);
   area.innerHTML = html;
 }
 
-// ===== 按天视图 =====
 function renderDayView(phaseOrder, phases, rangeStartOrd, rangeEndOrd, dayWidth) {
   const viewStartOrd = rangeStartOrd - 2;
   const viewEndOrd = rangeEndOrd + 5;
   const totalDays = viewEndOrd - viewStartOrd + 1;
   const timelineWidth = totalDays * dayWidth;
   let html = '';
-  html += '<div class="gantt-header-row">';
-  html += '<div class="gantt-task-label-header">任务</div>';
+  html += '<div class="gantt-header-row"><div class="gantt-task-label-header">任务</div>';
   html += `<div class="gantt-timeline-header" style="width:${timelineWidth}px;">`;
   for (let i = 0; i < totalDays; i++) {
     const ord = viewStartOrd + i;
     const dateStr = ordToDateStr(ord);
-    const [y, m, d] = dateStr.split('-').map(Number);
     const dow = getDayOfWeek(dateStr);
     const isWeekend = dow === 0 || dow === 6;
     const isToday = ord === todayOrd;
     const dayName = ['日','一','二','三','四','五','六'][dow];
     html += `<div class="gantt-day-header${isWeekend?' weekend':''}${isToday?' today':''}" style="width:${dayWidth}px;">`;
-    html += `<div class="day-num">${d}</div>`;
-    html += `<div class="day-name">${dayName}</div>`;
-    html += `</div>`;
+    html += `<div class="day-num">${dateStr.split('-')[2]}</div><div class="day-name">${dayName}</div></div>`;
   }
   html += '</div></div>';
   html += '<div class="gantt-body" style="position:relative;">';
   const todayRelPos = todayOrd - viewStartOrd;
-  if (todayRelPos >= 0 && todayRelPos < totalDays) {
-    html += `<div class="gantt-today-line" style="left:${150 + todayRelPos * dayWidth}px;"></div>`;
-  }
+  if (todayRelPos >= 0 && todayRelPos < totalDays) html += `<div class="gantt-today-line" style="left:${150 + todayRelPos * dayWidth}px;"></div>`;
   for (let i = 0; i < totalDays; i++) {
-    const ord = viewStartOrd + i;
-    const left = 150 + i * dayWidth;
+    const ord = viewStartOrd + i; const left = 150 + i * dayWidth;
     const dow = getDayOfWeek(ordToDateStr(ord));
-    if (dow === 0 || dow === 6) {
-      html += `<div style="position:absolute;top:0;bottom:0;left:${left}px;width:${dayWidth*2}px;background:rgba(0,0,0,0.02);pointer-events:none;"></div>`;
-    }
+    if (dow === 0 || dow === 6) html += `<div style="position:absolute;top:0;bottom:0;left:${left}px;width:${dayWidth*2}px;background:rgba(0,0,0,0.02);pointer-events:none;"></div>`;
     html += `<div class="gantt-grid-line" style="left:${left}px;"></div>`;
   }
   phaseOrder.forEach(phaseName => {
     html += `<div class="phase-separator">📌 ${phaseName}</div>`;
     phases[phaseName].forEach(task => {
-      const startOrd = dateStrToOrd(task.start);
-      const offsetDays = startOrd - viewStartOrd;
+      const offsetDays = dateStrToOrd(task.start) - viewStartOrd;
       const left = offsetDays * dayWidth;
       const width = task.duration * dayWidth - 4;
       const progressWidth = Math.round((task.progress / 100) * width);
       const endStr = addDaysToStr(task.start, task.duration - 1);
       const tooltip = `${task.name} | ${task.progress}% | ${task.start} ~ ${endStr}`;
       html += `<div class="gantt-row" ondblclick="openEdit(${task.id})" title="${tooltip}">`;
-      html += `<div class="gantt-task-label">`;
-      html += `<div class="label-name">${task.name}</div>`;
-      html += `<div class="label-owner">${task.owner} | ${task.duration}天 | ${task.progress}%</div>`;
-      html += `</div>`;
-      html += `<div class="gantt-bar-area" style="width:${timelineWidth}px;">`;
-      html += `<div class="gantt-bar-wrapper" style="left:${left}px;width:${width}px;" title="${tooltip}">`;
-      html += `<div class="gantt-bar-bg" style="background:${task.color};width:${width}px;"></div>`;
-      html += `<div class="gantt-bar-progress" style="width:${progressWidth}px;background:${task.color};opacity:0.85;"></div>`;
-      html += `<div class="gantt-bar-label">${task.name}</div>`;
-      html += `</div></div></div>`;
-    });
-  });
-  html += '</div>';
-  return html;
-}
-
-// ===== 按周视图 =====
-function renderWeekView(phaseOrder, phases, rangeStartOrd, rangeEndOrd, dayWidth) {
-  const viewStartOrd = rangeStartOrd - 2;
-  const viewEndOrd = rangeEndOrd + 5;
-  const totalDays = viewEndOrd - viewStartOrd + 1;
-  const timelineWidth = totalDays * dayWidth;
-  let html = '';
-  html += '<div class="gantt-header-row">';
-  html += '<div class="gantt-task-label-header">任务</div>';
-  html += `<div class="gantt-timeline-header" style="width:${timelineWidth}px;">`;
-  let firstWeekStart = viewStartOrd;
-  while (getDayOfWeek(ordToDateStr(firstWeekStart)) !== 1) firstWeekStart++;
-  for (let ord = firstWeekStart; ord <= viewEndOrd; ord += 7) {
-    const weekStartStr = ordToDateStr(ord);
-    const weekEndStr = ordToDateStr(ord + 6);
-    const [sy, sm, sd] = weekStartStr.split('-').map(Number);
-    const [ey, em, ed] = weekEndStr.split('-').map(Number);
-    const isCurrentWeek = ord <= todayOrd && todayOrd <= ord + 6;
-    html += `<div style="width:${dayWidth*7}px;text-align:center;font-size:11px;font-weight:600;color:#555;padding:5px 0;${isCurrentWeek?'background:#e8f0fe;':''}">`;
-    html += `${sm}/${sd} ~ ${em}/${ed}`;
-    html += `</div>`;
-  }
-  html += '</div></div>';
-  html += '<div class="gantt-body" style="position:relative;">';
-  const todayRelPos = todayOrd - viewStartOrd;
-  if (todayRelPos >= 0 && todayRelPos < totalDays) {
-    html += `<div class="gantt-today-line" style="left:${150 + todayRelPos * dayWidth}px;"></div>`;
-  }
-  for (let i = 0; i < totalDays; i++) {
-    const ord = viewStartOrd + i;
-    const left = 150 + i * dayWidth;
-    const dow = getDayOfWeek(ordToDateStr(ord));
-    if (dow === 0 || dow === 6) {
-      html += `<div style="position:absolute;top:0;bottom:0;left:${left}px;width:${dayWidth*2}px;background:rgba(0,0,0,0.02);pointer-events:none;"></div>`;
-    }
-    html += `<div class="gantt-grid-line" style="left:${left}px;"></div>`;
-  }
-  phaseOrder.forEach(phaseName => {
-    html += `<div class="phase-separator">📌 ${phaseName}</div>`;
-    phases[phaseName].forEach(task => {
-      const startOrd = dateStrToOrd(task.start);
-      const offsetDays = startOrd - viewStartOrd;
-      const left = offsetDays * dayWidth;
-      const width = task.duration * dayWidth - 4;
-      const progressWidth = Math.round((task.progress / 100) * width);
-      const endStr = addDaysToStr(task.start, task.duration - 1);
-      const tooltip = `${task.name} | ${task.progress}% | ${task.start} ~ ${endStr}`;
-      html += `<div class="gantt-row" ondblclick="openEdit(${task.id})" title="${tooltip}">`;
-      html += `<div class="gantt-task-label"><div class="label-name">${task.name}</div>`;
-      html += `<div class="label-owner">${task.owner} | ${task.duration}天 | ${task.progress}%</div></div>`;
+      html += `<div class="gantt-task-label"><div class="label-name">${task.name}</div><div class="label-owner">${task.owner} | ${task.duration}天 | ${task.progress}%</div></div>`;
       html += `<div class="gantt-bar-area" style="width:${timelineWidth}px;">`;
       html += `<div class="gantt-bar-wrapper" style="left:${left}px;width:${width}px;" title="${tooltip}">`;
       html += `<div class="gantt-bar-bg" style="background:${task.color};width:${width}px;"></div>`;
@@ -1041,69 +979,96 @@ function renderWeekView(phaseOrder, phases, rangeStartOrd, rangeEndOrd, dayWidth
   return html;
 }
 
-// ===== 按月视图 =====
+function renderWeekView(phaseOrder, phases, rangeStartOrd, rangeEndOrd, dayWidth) {
+  const viewStartOrd = rangeStartOrd - 2;
+  const viewEndOrd = rangeEndOrd + 5;
+  const totalDays = viewEndOrd - viewStartOrd + 1;
+  const timelineWidth = totalDays * dayWidth;
+  let html = '';
+  html += '<div class="gantt-header-row"><div class="gantt-task-label-header">任务</div>';
+  html += `<div class="gantt-timeline-header" style="width:${timelineWidth}px;">`;
+  let firstWeekStart = viewStartOrd;
+  while (getDayOfWeek(ordToDateStr(firstWeekStart)) !== 1) firstWeekStart++;
+  for (let ord = firstWeekStart; ord <= viewEndOrd; ord += 7) {
+    const [sy, sm, sd] = ordToDateStr(ord).split('-').map(Number);
+    const [ey, em, ed] = ordToDateStr(ord + 6).split('-').map(Number);
+    const isCurrentWeek = ord <= todayOrd && todayOrd <= ord + 6;
+    html += `<div style="width:${dayWidth*7}px;text-align:center;font-size:11px;font-weight:600;color:#555;padding:5px 0;${isCurrentWeek?'background:#e8f0fe;':''}">${sm}/${sd} ~ ${em}/${ed}</div>`;
+  }
+  html += '</div></div>';
+  html += '<div class="gantt-body" style="position:relative;">';
+  const todayRelPos = todayOrd - viewStartOrd;
+  if (todayRelPos >= 0 && todayRelPos < totalDays) html += `<div class="gantt-today-line" style="left:${150 + todayRelPos * dayWidth}px;"></div>`;
+  for (let i = 0; i < totalDays; i++) {
+    const ord = viewStartOrd + i; const left = 150 + i * dayWidth;
+    const dow = getDayOfWeek(ordToDateStr(ord));
+    if (dow === 0 || dow === 6) html += `<div style="position:absolute;top:0;bottom:0;left:${left}px;width:${dayWidth*2}px;background:rgba(0,0,0,0.02);pointer-events:none;"></div>`;
+    html += `<div class="gantt-grid-line" style="left:${left}px;"></div>`;
+  }
+  phaseOrder.forEach(phaseName => {
+    html += `<div class="phase-separator">📌 ${phaseName}</div>`;
+    phases[phaseName].forEach(task => {
+      const offsetDays = dateStrToOrd(task.start) - viewStartOrd;
+      const left = offsetDays * dayWidth;
+      const width = task.duration * dayWidth - 4;
+      const progressWidth = Math.round((task.progress / 100) * width);
+      const endStr = addDaysToStr(task.start, task.duration - 1);
+      const tooltip = `${task.name} | ${task.progress}% | ${task.start} ~ ${endStr}`;
+      html += `<div class="gantt-row" ondblclick="openEdit(${task.id})" title="${tooltip}">`;
+      html += `<div class="gantt-task-label"><div class="label-name">${task.name}</div><div class="label-owner">${task.owner} | ${task.duration}天 | ${task.progress}%</div></div>`;
+      html += `<div class="gantt-bar-area" style="width:${timelineWidth}px;">`;
+      html += `<div class="gantt-bar-wrapper" style="left:${left}px;width:${width}px;" title="${tooltip}">`;
+      html += `<div class="gantt-bar-bg" style="background:${task.color};width:${width}px;"></div>`;
+      html += `<div class="gantt-bar-progress" style="width:${progressWidth}px;background:${task.color};opacity:0.85;"></div>`;
+      html += `<div class="gantt-bar-label">${task.name}</div></div></div></div>`;
+    });
+  });
+  html += '</div>';
+  return html;
+}
+
 function renderMonthView(phaseOrder, phases, rangeStartOrd, rangeEndOrd, baseDayWidth) {
-  const startDate = ordToDateStr(rangeStartOrd);
-  const endDate = ordToDateStr(rangeEndOrd);
-  const [startY, startM] = startDate.split('-').map(Number);
-  const [endY, endM] = endDate.split('-').map(Number);
+  const [startY, startM] = ordToDateStr(rangeStartOrd).split('-').map(Number);
+  const [endY, endM] = ordToDateStr(rangeEndOrd).split('-').map(Number);
   const monthWidth = 120;
   const totalMonths = (endY - startY) * 12 + (endM - startM) + 1;
   const timelineWidth = totalMonths * monthWidth;
   let html = '';
-  html += '<div class="gantt-header-row">';
-  html += '<div class="gantt-task-label-header">任务</div>';
+  html += '<div class="gantt-header-row"><div class="gantt-task-label-header">任务</div>';
   html += `<div class="gantt-timeline-header" style="width:${timelineWidth}px;">`;
   const yearSpans = {};
-  for (let i = 0; i < totalMonths; i++) {
-    const yr = startY + Math.floor((startM - 1 + i) / 12);
-    yearSpans[yr] = (yearSpans[yr] || 0) + 1;
-  }
-  Object.keys(yearSpans).sort().forEach(yr => {
-    html += `<div class="gantt-year-header" style="width:${yearSpans[yr] * monthWidth}px;">${yr}年</div>`;
-  });
+  for (let i = 0; i < totalMonths; i++) { const yr = startY + Math.floor((startM - 1 + i) / 12); yearSpans[yr] = (yearSpans[yr] || 0) + 1; }
+  Object.keys(yearSpans).sort().forEach(yr => { html += `<div class="gantt-year-header" style="width:${yearSpans[yr] * monthWidth}px;">${yr}年</div>`; });
   html += '</div></div>';
-  html += '<div class="gantt-header-row">';
-  html += '<div class="gantt-task-label-header"></div>';
+  html += '<div class="gantt-header-row"><div class="gantt-task-label-header"></div>';
   html += `<div class="gantt-timeline-header" style="width:${timelineWidth}px;">`;
   for (let i = 0; i < totalMonths; i++) {
     const monthIdx = startM - 1 + i;
     const yr = startY + Math.floor(monthIdx / 12);
     const mo = (monthIdx % 12) + 1;
-    const todayParts = todayStr.split('-').map(Number);
-    const isCurrentMonth = yr === todayParts[0] && mo === todayParts[1];
+    const isCurrentMonth = yr === todayStr.split('-').map(Number)[0] && mo === todayStr.split('-').map(Number)[1];
     html += `<div class="gantt-month-header" style="width:${monthWidth}px;${isCurrentMonth?'background:#1a73e8;color:#fff;':''}">${mo}月</div>`;
   }
   html += '</div></div>';
   html += '<div class="gantt-body" style="position:relative;">';
   const todayParts = todayStr.split('-').map(Number);
   const todayMonthIdx = (todayParts[0] - startY) * 12 + (todayParts[1] - startM);
-  const daysInTodayMonth = getDaysInMonth(todayParts[0], todayParts[1]);
-  const todayInMonthRatio = (todayParts[2] - 1) / daysInTodayMonth;
-  const todayLeft = 150 + (todayMonthIdx + todayInMonthRatio) * monthWidth;
-  if (todayMonthIdx >= 0 && todayMonthIdx < totalMonths) {
-    html += `<div class="gantt-today-line" style="left:${todayLeft}px;"></div>`;
-  }
-  for (let i = 0; i <= totalMonths; i++) {
-    const left = 150 + i * monthWidth;
-    html += `<div class="gantt-grid-line" style="left:${left}px;border-left:1px solid #e8e8e8;"></div>`;
-  }
+  const todayInMonthRatio = (todayParts[2] - 1) / getDaysInMonth(todayParts[0], todayParts[1]);
+  if (todayMonthIdx >= 0 && todayMonthIdx < totalMonths) html += `<div class="gantt-today-line" style="left:${150 + (todayMonthIdx + todayInMonthRatio) * monthWidth}px;"></div>`;
+  for (let i = 0; i <= totalMonths; i++) html += `<div class="gantt-grid-line" style="left:${150 + i * monthWidth}px;border-left:1px solid #e8e8e8;"></div>`;
   phaseOrder.forEach(phaseName => {
     html += `<div class="phase-separator">📌 ${phaseName}</div>`;
     phases[phaseName].forEach(task => {
       const [ty, tm, td] = task.start.split('-').map(Number);
       const monthsFromStart = (ty - startY) * 12 + (tm - startM);
       const daysInTaskMonth = getDaysInMonth(ty, tm);
-      const intraMonthRatio = (td - 1) / daysInTaskMonth;
-      const left = (monthsFromStart + intraMonthRatio) * monthWidth;
-      const durationMonths = task.duration / daysInTaskMonth;
-      const width = Math.max(monthWidth * durationMonths - 2, 8);
+      const left = (monthsFromStart + (td - 1) / daysInTaskMonth) * monthWidth;
+      const width = Math.max(monthWidth * (task.duration / daysInTaskMonth) - 2, 8);
       const progressWidth = Math.round((task.progress / 100) * width);
       const endStr = addDaysToStr(task.start, task.duration - 1);
       const tooltip = `${task.name} | ${task.progress}% | ${task.start} ~ ${endStr}`;
       html += `<div class="gantt-row" ondblclick="openEdit(${task.id})" title="${tooltip}">`;
-      html += `<div class="gantt-task-label"><div class="label-name">${task.name}</div>`;
-      html += `<div class="label-owner">${task.owner} | ${task.duration}天 | ${task.progress}%</div></div>`;
+      html += `<div class="gantt-task-label"><div class="label-name">${task.name}</div><div class="label-owner">${task.owner} | ${task.duration}天 | ${task.progress}%</div></div>`;
       html += `<div class="gantt-bar-area" style="width:${timelineWidth}px;">`;
       html += `<div class="gantt-bar-wrapper" style="left:${left}px;width:${width}px;" title="${tooltip}">`;
       html += `<div class="gantt-bar-bg" style="background:${task.color};width:${width}px;"></div>`;
@@ -1119,7 +1084,6 @@ function renderMonthView(phaseOrder, phases, rangeStartOrd, rangeEndOrd, baseDay
 //  任务操作
 // ============================================================
 function selectTask(id) { selectedTaskId = id; renderTaskList(); }
-
 function addTask() {
   const name = document.getElementById('f_name').value.trim();
   const startVal = document.getElementById('f_start').value;
@@ -1127,69 +1091,38 @@ function addTask() {
   if (!name || !startVal) { alert('请填写任务名称和开始日期'); return; }
   if (!isValidDateStr(startVal)) { alert('请选择有效的开始日期（格式：YYYY-MM-DD）'); return; }
   const startOrd = dateStrToOrd(startVal);
-  if (ordToDateStr(startOrd) !== startVal) { alert(`日期解析异常：${startVal} → ${ordToDateStr(startOrd)}`); return; }
+  if (ordToDateStr(startOrd) !== startVal) { alert(`日期解析异常`); return; }
   const newId = ganttData.tasks.length > 0 ? Math.max(...ganttData.tasks.map(t => t.id)) + 1 : 1;
-  const newTask = {
-    id: newId,
-    phase: document.getElementById('f_phase').value || '未分类',
-    name: name,
-    owner: document.getElementById('f_owner').value || '未分配',
-    start: startVal,
-    duration: duration,
+  ganttData.tasks.push({ id: newId, phase: document.getElementById('f_phase').value || '未分类', name,
+    owner: document.getElementById('f_owner').value || '未分配', start: startVal, duration,
     progress: parseInt(document.getElementById('f_progress').value) || 0,
-    color: document.getElementById('f_color').value || '#4CAF50'
-  };
-  const endStr = addDaysToStr(newTask.start, newTask.duration - 1);
-  ganttData.tasks.push(newTask);
+    color: document.getElementById('f_color').value || '#4CAF50' });
   document.getElementById('f_name').value = '';
-  document.getElementById('f_progress').value = '0';
-  document.getElementById('f_progress_val').textContent = '0';
+  document.getElementById('f_progress').value = '0'; document.getElementById('f_progress_val').textContent = '0';
   document.getElementById('f_start').value = todayStr;
-  document.getElementById('debugAdd').textContent = `✓ 已添加: ${newTask.start} ~ ${endStr} (${newTask.duration}天)`;
+  document.getElementById('debugAdd').textContent = `✓ 已添加: ${startVal} ~ ${addDaysToStr(startVal, duration-1)} (${duration}天)`;
   renderAll();
-  showStatus('githubStatus', `✅ 任务「${name}」已添加（${newTask.start} ~ ${endStr}）`, 'success');
-  setTimeout(() => showStatus('githubStatus', ''), 4000);
+  showStatus('githubStatus', `✅ 任务「${name}」已添加`, 'success'); setTimeout(() => showStatus('githubStatus', ''), 4000);
 }
-
-function deleteTask(id) {
-  if (!confirm('确定删除这个任务吗？')) return;
-  ganttData.tasks = ganttData.tasks.filter(t => t.id !== id);
-  renderAll();
-}
-
+function deleteTask(id) { if (!confirm('确定删除这个任务吗？')) return; ganttData.tasks = ganttData.tasks.filter(t => t.id !== id); renderAll(); }
 function openEdit(id) {
-  const task = ganttData.tasks.find(t => t.id === id);
-  if (!task) return;
-  editingTaskId = id;
-  document.getElementById('e_name').value = task.name;
-  document.getElementById('e_phase').value = task.phase;
-  document.getElementById('e_owner').value = task.owner;
-  document.getElementById('e_start').value = task.start;
-  document.getElementById('e_duration').value = task.duration;
-  document.getElementById('e_progress').value = task.progress;
-  document.getElementById('e_progress_val').textContent = task.progress;
-  document.getElementById('e_color').value = task.color;
+  const task = ganttData.tasks.find(t => t.id === id); if (!task) return; editingTaskId = id;
+  document.getElementById('e_name').value = task.name; document.getElementById('e_phase').value = task.phase;
+  document.getElementById('e_owner').value = task.owner; document.getElementById('e_start').value = task.start;
+  document.getElementById('e_duration').value = task.duration; document.getElementById('e_progress').value = task.progress;
+  document.getElementById('e_progress_val').textContent = task.progress; document.getElementById('e_color').value = task.color;
   document.getElementById('editModal').classList.add('active');
 }
 function closeModal() { document.getElementById('editModal').classList.remove('active'); editingTaskId = null; }
-
 function saveEdit() {
-  const task = ganttData.tasks.find(t => t.id === editingTaskId);
-  if (!task) return;
-  const newStart = document.getElementById('e_start').value;
-  if (!isValidDateStr(newStart)) { alert('日期格式无效'); return; }
-  task.name = document.getElementById('e_name').value;
-  task.phase = document.getElementById('e_phase').value;
-  task.owner = document.getElementById('e_owner').value;
-  task.start = newStart;
+  const task = ganttData.tasks.find(t => t.id === editingTaskId); if (!task) return;
+  const newStart = document.getElementById('e_start').value; if (!isValidDateStr(newStart)) { alert('日期格式无效'); return; }
+  task.name = document.getElementById('e_name').value; task.phase = document.getElementById('e_phase').value;
+  task.owner = document.getElementById('e_owner').value; task.start = newStart;
   task.duration = parseInt(document.getElementById('e_duration').value) || 1;
-  task.progress = parseInt(document.getElementById('e_progress').value) || 0;
-  task.color = document.getElementById('e_color').value;
-  const endStr = addDaysToStr(task.start, task.duration - 1);
-  showStatus('githubStatus', `✅ 已更新：${task.start} ~ ${endStr}`, 'success');
-  setTimeout(() => showStatus('githubStatus', ''), 3000);
-  closeModal();
-  renderAll();
+  task.progress = parseInt(document.getElementById('e_progress').value) || 0; task.color = document.getElementById('e_color').value;
+  showStatus('githubStatus', `✅ 已更新：${task.start} ~ ${addDaysToStr(task.start, task.duration-1)}`, 'success');
+  setTimeout(() => showStatus('githubStatus', ''), 3000); closeModal(); renderAll();
 }
 
 // ============================================================
@@ -1197,38 +1130,13 @@ function saveEdit() {
 // ============================================================
 function showConfig() { document.getElementById('configModal').classList.add('active'); }
 function closeConfig() { document.getElementById('configModal').classList.remove('active'); }
-
-function loadGitHubConfigUI() {
-  const saved = localStorage.getItem('github_config');
-  if (saved) {
-    try {
-      const cfg = JSON.parse(saved);
-      document.getElementById('cfg_owner').value = cfg.owner || '';
-      document.getElementById('cfg_repo').value = cfg.repo || '';
-      document.getElementById('cfg_branch').value = cfg.branch || 'main';
-      document.getElementById('cfg_token').value = cfg.token || '';
-      document.getElementById('cfg_path').value = cfg.path || 'gantt-data.json';
-      showStatus('githubStatus', '✅ GitHub 已配置，可以保存到仓库', 'success');
-    } catch(e) { console.warn(e); }
-  } else {
-    showStatus('githubStatus', '⚠️ 未配置 GitHub，数据仅保存在本地。点击右上角「配置GitHub」开启协作功能。', 'info');
-  }
-}
-
 function saveConfig() {
-  const cfg = {
-    owner: document.getElementById('cfg_owner').value.trim(),
-    repo: document.getElementById('cfg_repo').value.trim(),
-    branch: document.getElementById('cfg_branch').value.trim() || 'main',
-    token: document.getElementById('cfg_token').value.trim(),
-    path: document.getElementById('cfg_path').value.trim() || 'gantt-data.json'
-  };
-  localStorage.setItem('github_config', JSON.stringify(cfg));
-  closeConfig();
-  showStatus('githubStatus', '✅ GitHub 配置已保存', 'success');
-  setTimeout(() => renderAll(), 1000);
+  const cfg = { owner: document.getElementById('cfg_owner').value.trim(), repo: document.getElementById('cfg_repo').value.trim(),
+    branch: document.getElementById('cfg_branch').value.trim() || 'main', token: document.getElementById('cfg_token').value.trim(),
+    path: document.getElementById('cfg_path').value.trim() || 'gantt-data.json' };
+  localStorage.setItem('github_config', JSON.stringify(cfg)); closeConfig();
+  showStatus('githubStatus', '✅ GitHub 配置已保存', 'success'); setTimeout(() => renderAll(), 1000);
 }
-
 async function saveToGitHub() {
   const saved = localStorage.getItem('github_config');
   if (!saved) { showStatus('githubStatus', '⚠️ 请先配置 GitHub 信息', 'error'); showConfig(); return; }
@@ -1237,30 +1145,16 @@ async function saveToGitHub() {
   showStatus('githubStatus', '⏳ 正在保存到 GitHub...', 'info');
   try {
     const apiUrl = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.path}`;
-    const getRes = await fetch(apiUrl + '?ref=' + cfg.branch, {
-      headers: { 'Authorization': 'token ' + cfg.token }
-    });
-    let sha = null;
-    if (getRes.ok) sha = (await getRes.json()).sha;
-    // 明文 JSON → btoa（GitHub Contents API 要求 base64 编码内容）
+    const getRes = await fetch(apiUrl + '?ref=' + cfg.branch, { headers: { 'Authorization': 'token ' + cfg.token } });
+    let sha = null; if (getRes.ok) sha = (await getRes.json()).sha;
+    ganttData.lastUpdated = new Date().toLocaleString('zh-CN');
     const content = JSON.stringify(ganttData, null, 2);
     const encoded = btoa(unescape(encodeURIComponent(content)));
-    const putRes = await fetch(apiUrl, {
-      method: 'PUT',
-      headers: { 'Authorization': 'token ' + cfg.token, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        message: '更新甘特图数据 - ' + new Date().toLocaleString('zh-CN'),
-        content: encoded,
-        branch: cfg.branch,
-        sha: sha
-      })
-    });
+    const putRes = await fetch(apiUrl, { method: 'PUT', headers: { 'Authorization': 'token ' + cfg.token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: '更新甘特图数据 - ' + ganttData.lastUpdated, content: encoded, branch: cfg.branch, sha }) });
     if (!putRes.ok) throw new Error((await putRes.json()).message || '保存失败');
-    showStatus('githubStatus', '✅ 已成功保存到 GitHub！', 'success');
-    renderLastUpdated();
-  } catch (e) {
-    showStatus('githubStatus', '❌ 保存失败：' + e.message, 'error');
-  }
+    showStatus('githubStatus', '✅ 已成功保存到 GitHub！', 'success'); renderLastUpdated();
+  } catch (e) { showStatus('githubStatus', '❌ 保存失败：' + e.message, 'error'); }
 }
 
 // ============================================================
@@ -1269,42 +1163,30 @@ async function saveToGitHub() {
 function exportJSON() {
   const data = JSON.stringify(ganttData, null, 2);
   const blob = new Blob([data], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'gantt-data.json'; a.click();
-  URL.revokeObjectURL(url);
+  const url = URL.createObjectURL(blob); const a = document.createElement('a');
+  a.href = url; a.download = 'gantt-data.json'; a.click(); URL.revokeObjectURL(url);
 }
 function importJSON() { document.getElementById('fileInput').click(); }
 function handleImport(e) {
-  const file = e.target.files[0];
-  if (!file) return;
+  const file = e.target.files[0]; if (!file) return;
   const reader = new FileReader();
-  reader.onload = function(ev) {
-    try {
-      ganttData = JSON.parse(ev.target.result);
-      renderAll();
-      showStatus('githubStatus', '✅ 数据导入成功', 'success');
-      setTimeout(() => showStatus('githubStatus', ''), 3000);
-    } catch (err) { showStatus('githubStatus', '❌ 文件格式错误', 'error'); }
-  };
-  reader.readAsText(file);
-  e.target.value = '';
+  reader.onload = function(ev) { try { ganttData = JSON.parse(ev.target.result); renderAll(); showStatus('githubStatus', '✅ 数据导入成功', 'success'); setTimeout(() => showStatus('githubStatus', ''), 3000); } catch (err) { showStatus('githubStatus', '❌ 文件格式错误', 'error'); } };
+  reader.readAsText(file); e.target.value = '';
 }
+function showStatus(elementId, msg, type) { const el = document.getElementById(elementId); if (!msg) { el.innerHTML = ''; return; } el.innerHTML = `<div class="status-msg ${type}">${msg}</div>`; }
+
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeModal(); closeConfig(); } if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveToGitHub(); } });
 
 // ============================================================
-//  工具函数
+//  启动：密码验证通过后初始化甘特图
 // ============================================================
-function showStatus(elementId, msg, type) {
-  const el = document.getElementById(elementId);
-  if (!msg) { el.innerHTML = ''; return; }
-  el.innerHTML = `<div class="status-msg ${type}">${msg}</div>`;
+if (sessionStorage.getItem(PWD_STORAGE_KEY) === '1') {
+  document.getElementById('pwdOverlay').style.display = 'none';
+  window.__ganttInited = true; init();
+} else {
+  document.getElementById('pwdOverlay').style.display = 'flex';
+  document.getElementById('pwdInput').focus();
 }
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') { closeModal(); closeConfig(); }
-  if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveToGitHub(); }
-});
-
-// 页面加载：仅显示密码遮罩，不加载数据（防未授权读取）
 </script>
 </body>
 </html>
