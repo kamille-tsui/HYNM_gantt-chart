@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📊 HYNM项目管理在线甘特图</title>
+<!-- CryptoJS：AES 解密/加密（与 Python evpkdf+"Salted__" 格式兼容） -->
+<script src="https://cdn.jsdelivr.net/npm/crypto-js@4.2.0/crypto-js.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Microsoft YaHei','Segoe UI',sans-serif; background:#f5f7fa; color:#333; min-height:100vh; }
+  .header { background:linear-gradient(135deg,#1a73e8 0%,#0d47a1 100%); color:#fff; padding:20px 30px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 10px rgba(0,0,0,.1); }
+  .header h1 { font-size:24px; font-weight:600; }
+  .header .info { font-size:14px; opacity:.9; }
+  .header .actions { display:flex; gap:10px; align-items:center; }
+  .btn { padding:8px 16px; border:none; border-radius:6px; cursor:pointer; font-size:14px; font-weight:500; transition:all .2s; }
+  .btn-primary { background:#fff; color:#1a73e8; }
+  .btn-primary:hover { background:#e8f0fe; }
+  .btn-success { background:#34a853; color:#fff; }
+  .btn-success:hover { background:#2d8f47; }
+  .btn-warning { background:#fbbc04; color:#333; }
+  .btn-warning:hover { background:#e8a800; }
+  .btn-sm { padding:4px 10px; font-size:12px; }
+  .toolbar { background:#fff; padding:12px 30px; display:flex; gap:15px; align-items:center; border-bottom:1px solid #e0e0e0; flex-wrap:wrap; }
+  .toolbar label { font-size:13px; color:#666; font-weight:500; }
+  .toolbar input,.toolbar select { padding:6px 10px; border:1px solid #ddd; border-radius:4px; font-size:13px; }
+  .toolbar input:focus,.toolbar select:focus { outline:none; border-color:#1a73e8; }
+  .main-container { display:flex; height:calc(100vh - 130px); }
+  .sidebar { width:320px; min-width:320px; background:#fff; border-right:1px solid #e0e0e0; overflow-y:auto; padding:15px; }
+  .sidebar h3 { font-size:15px; margin-bottom:12px; color:#1a73e8; display:flex; justify-content:space-between; align-items:center; }
+  .task-form { background:#f9fafb; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #e8eaed; }
+  .task-form .form-group { margin-bottom:10px; }
+  .task-form label { display:block; font-size:12px; color:#666; margin-bottom:3px; font-weight:500; }
+  .task-form input,.task-form select { width:100%; padding:6px 8px; border:1px solid #ddd; border-radius:4px; font-size:13px; }
+  .task-form .form-row { display:flex; gap:8px; }
+  .task-form .form-row .form-group { flex:1; }
+  .task-list { margin-top:10px; }
+  .task-item { padding:10px 12px; background:#fff; border:1px solid #e8eaed; border-radius:6px; margin-bottom:8px; cursor:pointer; transition:all .2s; position:relative; }
+  .task-item:hover { border-color:#1a73e8; box-shadow:0 1px 4px rgba(26,115,232,.15); }
+  .task-item.selected { border-color:#1a73e8; background:#e8f0fe; }
+  .task-item .task-name { font-size:13px; font-weight:600; margin-bottom:4px; }
+  .task-item .task-meta { font-size:11px; color:#888; display:flex; gap:8px; }
+  .task-item .task-progress-bar { height:4px; background:#e8eaed; border-radius:2px; margin-top:6px; overflow:hidden; }
+  .task-item .task-progress-fill { height:100%; border-radius:2px; transition:width .3s; }
+  .task-item .delete-btn { position:absolute; top:8px; right:8px; background:#ff4d4f; color:#fff; border:none; border-radius:3px; width:20px; height:20px; font-size:12px; cursor:pointer; display:none; }
+  .task-item:hover .delete-btn { display:block; }
+  .gantt-area { flex:1; overflow:auto; background:#fff; padding:20px; }
+  .gantt-header-row { display:flex; margin-bottom:5px; }
+  .gantt-task-label-header { width:150px; min-width:150px; font-size:12px; color:#666; font-weight:600; padding:5px; border-bottom:2px solid #e0e0e0; }
+  .gantt-timeline-header { display:flex; border-bottom:2px solid #e0e0e0; }
+  .gantt-day-header { width:28px; min-width:28px; text-align:center; font-size:10px; color:#888; padding:5px 0; border-right:1px solid #f0f0f0; }
+  .gantt-day-header.weekend { background:#f9f9f9; color:#bbb; }
+  .gantt-day-header.today { background:#1a73e8; color:#fff; font-weight:700; border-radius:2px; }
+  .gantt-day-header .day-num { font-size:11px; font-weight:600; }
+  .gantt-day-header .day-name { font-size:9px; }
+  .gantt-month-header { text-align:center; font-size:11px; font-weight:700; color:#555; padding:3px 0; background:#eef2f7; border-right:1px solid #ddd; }
+  .gantt-year-header { text-align:center; font-size:13px; font-weight:700; color:#333; padding:5px 0; border-right:2px solid #ccc; background:#e8edf3; }
+  .gantt-body { position:relative; }
+  .gantt-row { display:flex; align-items:center; height:42px; border-bottom:1px solid #f5f5f5; }
+  .gantt-row:hover { background:#fafbfc; }
+  .gantt-task-label { width:150px; min-width:150px; padding:0 8px; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; border-right:1px solid #e8eaed; height:100%; display:flex; flex-direction:column; justify-content:center; }
+  .gantt-task-label .label-name { font-weight:600; color:#333; }
+  .gantt-task-label .label-owner { font-size:10px; color:#999; margin-top:2px; }
+  .gantt-bar-area { position:relative; height:100%; flex:1; }
+  .gantt-grid-line { position:absolute; top:0; bottom:0; width:1px; background:#f0f0f0; }
+  .gantt-bar-wrapper { position:absolute; top:50%; transform:translateY(-50%); height:24px; border-radius:4px; overflow:hidden; cursor:pointer; box-shadow:0 1px 3px rgba(0,0,0,.1); transition:box-shadow .2s; }
+  .gantt-bar-wrapper:hover { box-shadow:0 2px 8px rgba(0,0,0,.2); }
+  .gantt-bar-bg { width:100%; height:100%; opacity:.25; border-radius:4px; }
+  .gantt-bar-progress { position:absolute; top:0; left:0; height:100%; border-radius:4px; transition:width .3s; }
+  .gantt-bar-label { position:absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; padding:0 8px; font-size:11px; font-weight:600; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.3); pointer-events:none; overflow:hidden; white-space:nowrap; }
+  .gantt-today-line { position:absolute; top:0; bottom:0; width:2px; background:#f44336; z-index:10; pointer-events:none; }
+  .gantt-today-line::before { content:'今日'; position:absolute; top:-18px; left:-12px; background:#f44336; color:#fff; font-size:10px; padding:1px 6px; border-radius:3px; white-space:nowrap; }
+  .phase-separator { height:28px; display:flex; align-items:center; background:#e8f0fe; font-size:12px; font-weight:700; color:#1a73e8; padding:0 10px; margin-top:5px; border-radius:4px; }
+  .progress-edit { display:flex; align-items:center; gap:8px; margin-top:8px; }
+  .progress-edit input[type="range"] { flex:1; }
+  .progress-edit .progress-val { font-size:13px; font-weight:600; color:#1a73e8; min-width:40px; }
+  .status-msg { padding:10px 16px; border-radius:6px; font-size:13px; margin:10px 0; display:none; }
+  .status-msg.success { background:#e6f4ea; color:#34a853; display:block; }
+  .status-msg.error { background:#fce8e8; color:#d93025; display:block; }
+  .status-msg.info { background:#e8f0fe; color:#1a73e8; display:block; }
+  .legend { display:flex; gap:15px; margin-top:15px; padding:10px 15px; background:#f9fafb; border-radius:6px; font-size:12px; flex-wrap:wrap; }
+  .legend-item { display:flex; align-items:center; gap:5px; }
+  .legend-color { width:14px; height:14px; border-radius:3px; }
+  .stats-row { display:flex; gap:15px; margin-bottom:15px; }
+  .stat-card { flex:1; background:#fff; padding:15px; border-radius:8px; border:1px solid #e8eaed; text-align:center; }
+  .stat-card .stat-value { font-size:24px; font-weight:700; color:#1a73e8; }
+  .stat-card .stat-label { font-size:12px; color:#888; margin-top:4px; }
+  .modal-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,.4); z-index:100; justify-content:center; align-items:center; }
+  .modal-overlay.active { display:flex; }
+  .modal { background:#fff; border-radius:12px; padding:25px; width:450px; max-width:90vw; box-shadow:0 8px 30px rgba(0,0,0,.2); }
+  .modal h2 { font-size:18px; margin-bottom:20px; color:#1a73e8; }
+  .modal .form-group { margin-bottom:15px; }
+  .modal label { display:block; font-size:13px; color:#555; margin-bottom:5px; font-weight:500; }
+  .modal input,.modal select { width:100%; padding:8px 12px; border:1px solid #ddd; border-radius:6px; font-size:14px; }
+  .modal .form-row { display:flex; gap:10px; }
+  .modal .form-row .form-group { flex:1; }
+  .modal .modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:20px; }
+  .github-config { background:#fff3cd; border:1px solid #ffc107; padding:12px 15px; border-radius:8px; margin-bottom:15px; font-size:13px; }
+  .github-config h4 { color:#856404; margin-bottom:8px; }
+  .github-config p { color:#856404; line-height:1.6; }
+  .github-config code { background:#fff; padding:1px 5px; border-radius:3px; font-family:monospace; }
+  .debug-info { font-size:11px; color:#999; margin-top:5px; font-family:monospace; }
+
+  /* ===== 密码验证遮罩 ===== */
+  .pwd-overlay { position:fixed; inset:0; background:linear-gradient(135deg,#0d47a1 0%,#1a73e8 100%); z-index:200; display:flex; justify-content:center; align-items:center; }
+  .pwd-box { background:#fff; padding:30px; border-radius:14px; width:380px; max-width:90vw; box-shadow:0 12px 40px rgba(0,0,0,.3); text-align:center; }
+  .pwd-box h2 { font-size:20px; color:#1a73e8; margin-bottom:8px; }
+  .pwd-box p { font-size:13px; color:#888; margin-bottom:18px; }
+  .pwd-box input { width:100%; padding:10px 14px; border:1px solid #ddd; border-radius:8px; font-size:15px; margin-bottom:12px; text-align:center; letter-spacing:2px; }
+  .pwd-box input:focus { outline:none; border-color:#1a73e8; }
+  .pwd-box .btn { width:100%; padding:10px; font-size:15px; }
+  .pwd-msg { font-size:12px; margin-top:10px; min-height:16px; }
+  .pwd-msg.err { color:#d93025; }
+  .pwd-msg.ok { color:#34a853; }
+</style>
+</head>
+<body>
+
+<!-- 密码验证遮罩 -->
+<div class="pwd-overlay" id="pwdOverlay">
+  <div class="pwd-box">
+    <h2>🔒 访问验证</h2>
+    <p>请输入访问密码以查看甘特图</p>
+    <input type="password" id="pwdInput" placeholder="请输入密码" autocomplete="off">
+    <button class="btn btn-success" onclick="doUnlock()">解 锁</button>
+    <div class="pwd-msg" id="pwdMsg"></div>
+  </div>
+</div>
+
+<div class="header" id="mainHeader" style="display:none;">
+  <div>
+    <h1>📊 HYNM项目管理在线甘特图</h1>
+    <div class="info" id="projectInfo"></div>
+  </div>
+  <div class="actions">
+    <button class="btn btn-warning btn-sm" onclick="showConfig()">⚙️ 配置</button>
+    <button class="btn btn-success btn-sm" onclick="saveToGitHub()">💾 保存修改并上传</button>
+    <button class="btn btn-primary btn-sm" onclick="exportJSON()">📥 导出JSON数据</button>
+    <button class="btn btn-primary btn-sm" onclick="importJSON()">📤 导入JSON数据</button>
+    <button class="btn btn-sm" style="background:#eee;color:#333;" onclick="lockApp()">🔓 退出</button>
+  </div>
+</div>
+
+<div class="toolbar" id="mainToolbar" style="display:none;">
+  <label>搜索：</label>
+  <input type="text" id="searchInput" placeholder="搜索任务名称..." oninput="renderGantt()">
+  <label>阶段筛选：</label>
+  <select id="phaseFilter" onchange="renderGantt()"><option value="">全部阶段</option></select>
+  <label>视图：</label>
+  <select id="viewMode" onchange="renderGantt()">
+    <option value="day">按天</option>
+    <option value="week">按周</option>
+    <option value="month">按月</option>
+  </select>
+  <span style="margin-left:auto; font-size:12px; color:#888;" id="lastUpdated"></span>
+</div>
+
+<div class="main-container" id="mainContainer" style="display:none;">
+  <div class="sidebar">
+    <div id="githubStatus"></div>
+    <h3>📈 项目统计</h3>
+    <div class="stats-row" style="flex-direction:column; gap:8px;">
+      <div class="stat-card" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px;"><span class="stat-label" style="margin:0;">总任务数</span><span class="stat-value" id="statTotal" style="font-size:20px;">0</span></div>
+      <div class="stat-card" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px;"><span class="stat-label" style="margin:0;">已完成</span><span class="stat-value" id="statDone" style="font-size:20px; color:#34a853;">0</span></div>
+      <div class="stat-card" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px;"><span class="stat-label" style="margin:0;">进行中</span><span class="stat-value" id="statProgress" style="font-size:20px; color:#ff9800;">0</span></div>
+      <div class="stat-card" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px;"><span class="stat-label" style="margin:0;">整体进度</span><span class="stat-value" id="statPercent" style="font-size:20px; color:#ff9800;">0%</span></div>
+    </div>
+    <h3 style="margin-top:20px;">➕ 添加任务</h3>
+    <div class="task-form" id="taskForm">
+      <div class="form-group"><label>任务名称 *</label><input type="text" id="f_name" placeholder="输入任务名称"></div>
+      <div class="form-row">
+        <div class="form-group"><label>所属阶段</label><input type="text" id="f_phase" placeholder="如：开发阶段" value="开发阶段"></div>
+        <div class="form-group"><label>负责人</label><input type="text" id="f_owner" placeholder="负责人"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>开始日期 *</label><input type="date" id="f_start"></div>
+        <div class="form-group"><label>持续天数 *</label><input type="number" id="f_duration" placeholder="天数" min="1" value="5"></div>
+      </div>
+      <div class="form-group">
+        <label>完成进度：<span id="f_progress_val">0</span>%</label>
+        <input type="range" id="f_progress" min="0" max="100" value="0" oninput="document.getElementById('f_progress_val').textContent=this.value">
+      </div>
+      <div class="form-group">
+        <label>颜色</label>
+        <select id="f_color">
+          <option value="#4CAF50">绿色</option><option value="#2196F3">蓝色</option>
+          <option value="#FF9800">橙色</option><option value="#9C27B0">紫色</option>
+          <option value="#F44336">红色</option><option value="#00BCD4">青色</option>
+        </select>
+      </div>
+      <button class="btn btn-success" style="width:100%;" onclick="addTask()">添加任务</button>
+      <div class="debug-info" id="debugAdd"></div>
+    </div>
+    <h3>📋 任务列表</h3>
+    <div class="task-list" id="taskList"></div>
+  </div>
+  <div class="gantt-area" id="ganttArea"></div>
+</div>
+
+<!-- Edit Task Modal -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <h2>✏️ 编辑任务</h2>
+    <div class="form-group"><label>任务名称</label><input type="text" id="e_name"></div>
+    <div class="form-row">
+      <div class="form-group"><label>所属阶段</label><input type="text" id="e_phase"></div>
+      <div class="form-group"><label>负责人</label><input type="text" id="e_owner"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>开始日期 *</label><input type="date" id="e_start"></div>
+      <div class="form-group"><label>持续天数 *</label><input type="number" id="e_duration" min="1"></div>
+    </div>
+    <div class="form-group"><label>完成进度：<span id="e_progress_val">0</span>%</label><input type="range" id="e_progress" min="0" max="100" oninput="document.getElementById('e_progress_val').textContent=this.value"></div>
+    <div class="form-group">
+      <label>颜色</label>
+      <select id="e_color">
+        <option value="#4CAF50">绿色</option><option value="#2196F3">蓝色</option>
+        <option value="#FF9800">橙色</option><option value="#9C27B0">紫色</option>
+        <option value="#F44336">红色</option><option value="#00BCD4">青色</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-warning" onclick="closeModal()">取消</button>
+      <button class="btn btn-success" onclick="saveEdit()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- GitHub Config Modal -->
+<div class="modal-overlay" id="configModal">
+  <div class="modal">
+    <h2>⚙️ GitHub 配置</h2>
+    <p style="font-size:13px; color:#666; margin-bottom:15px; line-height:1.6;">配置 GitHub 信息后，可将甘特图数据（加密后）保存回仓库，实现多人协作。<br>需要 <code style="background:#f0f0f0;padding:1px 4px;border-radius:2px;">repo</code> 权限的 Personal Access Token。</p>
+    <div class="form-group"><label>GitHub 用户名</label><input type="text" id="cfg_owner" placeholder="如：octocat"></div>
+    <div class="form-group"><label>仓库名称</label><input type="text" id="cfg_repo" placeholder="如：gantt-chart"></div>
+    <div class="form-group"><label>分支名称</label><input type="text" id="cfg_branch" placeholder="如：main" value="main"></div>
+    <div class="form-group"><label>Personal Access Token</label><input type="password" id="cfg_token" placeholder="ghp_xxxxxxxxxxxx"></div>
+    <div class="form-group"><label>数据文件路径（加密文件）</label><input type="text" id="cfg_path" placeholder="如：gantt-data.enc.json" value="gantt-data.enc.json"></div>
+    <div class="modal-actions">
+      <button class="btn btn-warning" onclick="closeConfig()">取消</button>
+      <button class="btn btn-success" onclick="saveConfig()">保存配置</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="fileInput" accept=".json" style="display:none;" onchange="handleImport(event)">
+
+<script>
+// ============================================================
+//  日期系统 —— 基于 Ordinal（序天数），消除时区问题
+// ============================================================
+function dateStrToOrd(dateStr){const[y,m,d]=dateStr.split('-').map(Number);return Math.floor(Date.UTC(y,m-1,d)/86400000);}
+function ordToDateStr(ord){const D=new Date(ord*86400000);return `${D.getUTCFullYear()}-${String(D.getUTCMonth()+1).padStart(2,'0')}-${String(D.getUTCDate()).padStart(2,'0')}`;}
+function daysBetween(a,b){return dateStrToOrd(b)-dateStrToOrd(a);}
+function addDaysToStr(s,n){return ordToDateStr(dateStrToOrd(s)+n);}
+function getDayOfWeek(s){const[y,m,d]=s.split('-').map(Number);return new Date(Date.UTC(y,m-1,d)).getUTCDay();}
+function getDaysInMonth(y,m){return new Date(Date.UTC(y,m,0)).getUTCDate();}
+function isValidDateStr(s){if(!/^\d{4}-\d{2}-\d{2}$/.test(s))return false;const[y,m,d]=s.split('-').map(Number);if(m<1||m>12)return false;if(d<1||d>getDaysInMonth(y,m))return false;return ordToDateStr(dateStrToOrd(s))===s;}
+function getTodayStr(){const n=new Date();return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;}
+
+// ============================================================
+//  密码 / 加解密
+// ============================================================
+const ACCESS_PASSWORD = "HYNM2026";
+const ENC_FILENAME    = "gantt-data.enc.json"; // 仓库中存放的加密数据文件
+
+// 解密：base64密文 -> 明文对象。密文格式为 CryptoJS 默认："Salted__" + 8字节salt + CBC密文
+function decryptData(b64Cipher){
+  try{
+    const bytes = CryptoJS.AES.decrypt(b64Cipher, ACCESS_PASSWORD);
+    const plain = bytes.toString(CryptoJS.enc.Utf8);
+    if(!plain) return null;
+    return JSON.parse(plain);
+  }catch(e){ return null; }
+}
+// 加密：明文对象 -> base64密文（CryptoJS 默认输出即 "Salted__..." 格式）
+function encryptData(obj){
+  const txt = JSON.stringify(obj);
+  const enc = CryptoJS.AES.encrypt(txt, ACCESS_PASSWORD);
+  return enc.toString(); // base64
+}
+
+// ============================================================
+//  全局状态
+// ============================================================
+let ganttData = null;
+let selectedTaskId = null;
+let editingTaskId = null;
+const todayStr = getTodayStr();
+const todayOrd = dateStrToOrd(todayStr);
+
+// ============================================================
+//  密码验证 UI
+// ============================================================
+function doUnlock(){
+  const v = document.getElementById('pwdInput').value;
+  const msg = document.getElementById('pwdMsg');
+  if(!v){ msg.className='pwd-msg err'; msg.textContent='请输入密码'; return; }
+  // 用一份内嵌的"探测密文"验证密码是否正确（避免先用网络文件失败导致误判）
+  if(v !== ACCESS_PASSWORD){ msg.className='pwd-msg err'; msg.textContent='密码错误，请重试'; return; }
+  msg.className='pwd-msg ok'; msg.textContent='验证成功，正在加载数据...';
+  document.getElementById('pwdOverlay').style.display='none';
+  document.getElementById('mainHeader').style.display='flex';
+  document.getElementById('mainToolbar').style.display='flex';
+  document.getElementById('mainContainer').style.display='flex';
+  init();
+}
+function lockApp(){
+  // 清除内存数据，回到密码页
+  ganttData = null;
+  document.getElementById('pwdInput').value='';
+  document.getElementById('pwdMsg').textContent='';
+  document.getElementById('pwdOverlay').style.display='flex';
+  document.getElementById('mainHeader').style.display='none';
+  document.getElementById('mainToolbar').style.display='none';
+  document.getElementById('mainContainer').style.display='none';
+}
+document.getElementById('pwdInput').addEventListener('keydown', e=>{ if(e.key==='Enter') doUnlock(); });
+
+// ============================================================
+//  初始化：加载并解密数据
+// ============================================================
+async function init(){
+  const params = new URLSearchParams(location.search);
+  const dataUrl = params.get('data') || ENC_FILENAME;
+  try{
+    const res = await fetch(dataUrl + '?t=' + Date.now(), { cache:'no-store' });
+    if(!res.ok) throw new Error('无法加载数据文件');
+    const encObj = await res.json();          // { "ciphertext": "<base64>" }
+    const b64 = encObj.ciphertext;
+    if(!b64) throw new Error('密文为空');
+    const data = decryptData(b64);
+    if(!data || !data.tasks) throw new Error('解密失败：密码错误或数据损坏');
+    ganttData = data;
+  }catch(e){
+    console.warn('加载/解密失败，使用默认数据', e);
+    ganttData = getDefaultData();
+    showStatus('githubStatus','⚠️ 无法读取加密数据，已载入默认数据（修改后保存将写入 '+ENC_FILENAME+'）','info');
+  }
+  const saved = localStorage.getItem('github_config');
+  if(saved){
+    const cfg = JSON.parse(saved);
+    document.getElementById('cfg_owner').value = cfg.owner||'';
+    document.getElementById('cfg_repo').value = cfg.repo||'';
+    document.getElementById('cfg_branch').value = cfg.branch||'main';
+    document.getElementById('cfg_token').value = cfg.token||'';
+    document.getElementById('cfg_path').value = cfg.path||ENC_FILENAME;
+    showStatus('githubStatus','✅ GitHub 已配置，可以保存到仓库','success');
+  }else{
+    showStatus('githubStatus','⚠️ 未配置 GitHub，数据仅保存在本地。点击右上角「配置GitHub」开启协作功能。','info');
+  }
+  document.getElementById('f_start').value = todayStr;
+  renderAll();
+}
+
+function getDefaultData(){
+  return {
+    project:{ name:'HYNM项目管理在线甘特图', manager:'未设置', startDate:'2026-08-01', endDate:'2099-12-31' },
+    tasks:[
+      {id:1,phase:'启动阶段',name:'项目立项',owner:'张三',start:'2026-08-01',duration:3,progress:100,color:'#4CAF50'},
+      {id:2,phase:'启动阶段',name:'需求调研',owner:'李四',start:'2026-08-04',duration:5,progress:80,color:'#4CAF50'},
+      {id:3,phase:'设计阶段',name:'UI设计',owner:'王五',start:'2026-08-09',duration:7,progress:40,color:'#2196F3'},
+      {id:4,phase:'设计阶段',name:'架构设计',owner:'赵六',start:'2026-08-09',duration:5,progress:60,color:'#2196F3'},
+      {id:5,phase:'开发阶段',name:'前端开发',owner:'王五',start:'2026-08-16',duration:10,progress:10,color:'#FF9800'},
+      {id:6,phase:'开发阶段',name:'后端开发',owner:'赵六',start:'2026-08-16',duration:12,progress:5,color:'#FF9800'},
+      {id:7,phase:'测试阶段',name:'集成测试',owner:'李四',start:'2026-08-28',duration:5,progress:0,color:'#9C27B0'},
+      {id:8,phase:'测试阶段',name:'验收测试',owner:'张三',start:'2026-09-02',duration:5,progress:0,color:'#9C27B0'},
+      {id:9,phase:'上线阶段',name:'部署上线',owner:'赵六',start:'2026-09-07',duration:3,progress:0,color:'#F44336'},
+      {id:10,phase:'上线阶段',name:'项目总结',owner:'张三',start:'2026-09-10',duration:5,progress:0,color:'#F44336'}
+    ]
+  };
+}
+
+// ============================================================
+//  渲染总入口
+// ============================================================
+function renderAll(){ renderProjectInfo(); renderStats(); renderPhaseFilter(); renderTaskList(); renderGantt(); renderLastUpdated(); }
+function renderProjectInfo(){const p=ganttData.project;document.getElementById('projectInfo').textContent=`${p.name} | 负责人：${p.manager} | ${p.startDate} ~ ${p.endDate}`;}
+function renderStats(){const t=ganttData.tasks;const tot=t.length;const done=t.filter(x=>x.progress>=100).length;const ing=t.filter(x=>x.progress>0&&x.progress<100).length;const avg=tot>0?Math.round(t.reduce((s,x)=>s+x.progress,0)/tot):0;document.getElementById('statTotal').textContent=tot;document.getElementById('statDone').textContent=done;document.getElementById('statProgress').textContent=ing;document.getElementById('statPercent').textContent=avg+'%';}
+function renderPhaseFilter(){const sel=document.getElementById('phaseFilter');const cur=sel.value;const ph=[...new Set(ganttData.tasks.map(x=>x.phase))];sel.innerHTML='<option value="">全部阶段</option>'+ph.map(p=>`<option value="${p}">${p}</option>`).join('');sel.value=cur;}
+function renderTaskList(){const c=document.getElementById('taskList');const s=document.getElementById('searchInput').value.toLowerCase();const ph=document.getElementById('phaseFilter').value;let t=ganttData.tasks.filter(x=>{return (!s||x.name.toLowerCase().includes(s))&&(!ph||x.phase===ph);});c.innerHTML=t.map(x=>{const e=addDaysToStr(x.start,x.duration-1);return `<div class="task-item ${selectedTaskId===x.id?'selected':''}" onclick="selectTask(${x.id})" ondblclick="openEdit(${x.id})"><button class="delete-btn" onclick="event.stopPropagation();deleteTask(${x.id})">✕</button><div class="task-name">${x.name}</div><div class="task-meta"><span>${x.phase}</span><span>👤 ${x.owner}</span><span>📅 ${x.start} ~ ${e}</span></div><div class="task-progress-bar"><div class="task-progress-fill" style="width:${x.progress}%;background:${x.color};"></div></div></div>`;}).join('');}
+function renderLastUpdated(){document.getElementById('lastUpdated').textContent='最后更新：'+new Date().toLocaleString('zh-CN');}
+
+// ============================================================
+//  甘特图核心渲染（按天/按周/按月）
+// ============================================================
+function renderGantt(){
+  const area=document.getElementById('ganttArea');const s=document.getElementById('searchInput').value.toLowerCase();const ph=document.getElementById('phaseFilter').value;const view=document.getElementById('viewMode').value;
+  let tasks=ganttData.tasks.filter(x=>(!s||x.name.toLowerCase().includes(s))&&(!ph||x.phase===ph));
+  const phaseOrder=[];const phases={};tasks.forEach(x=>{if(!phases[x.phase]){phases[x.phase]=[];phaseOrder.push(x.phase);}phases[x.phase].push(x);});
+  let rsOrd,reOrd;if(tasks.length>0){const ords=tasks.map(x=>dateStrToOrd(x.start));rsOrd=Math.min(...ords);reOrd=Math.max(...ords);tasks.forEach(x=>{const e=dateStrToOrd(x.start)+x.duration-1;if(e>reOrd)reOrd=e;});}else{rsOrd=dateStrToOrd(ganttData.project.startDate||'2026-01-01');reOrd=dateStrToOrd(ganttData.project.endDate||'2026-12-31');}
+  const dayWidth=28;let html='';const colors=[...new Set(tasks.map(x=>x.color))];
+  html+='<div class="legend"><span style="font-weight:600;margin-right:5px;">图例：</span>';
+  const cmap={ '#4CAF50':'启动/完成','#2196F3':'设计','#FF9800':'开发','#9C27B0':'测试','#F44336':'上线','#00BCD4':'其他' };
+  colors.forEach(c=>{html+=`<div class="legend-item"><div class="legend-color" style="background:${c}"></div>${cmap[c]||c}</div>`;});
+  html+='<div class="legend-item" style="margin-left:auto;"><div class="legend-color" style="background:#f44336;width:2px;height:14px;"></div>今日</div></div>';
+  if(view==='month') html+=renderMonthView(phaseOrder,phases,rsOrd,reOrd,dayWidth);
+  else if(view==='week') html+=renderWeekView(phaseOrder,phases,rsOrd,reOrd,dayWidth);
+  else html+=renderDayView(phaseOrder,phases,rsOrd,reOrd,dayWidth);
+  area.innerHTML=html;
+}
+function renderDayView(po,ph,rs,re,dw){const vs=rs-2,ve=re+5,td=ve-vs+1,tw=td*dw;let h='';h+='<div class="gantt-header-row"><div class="gantt-task-label-header">任务</div><div class="gantt-timeline-header" style="width:'+tw+'px;">';for(let i=0;i<td;i++){const o=vs+i,ds=ordToDateStr(o),p=ds.split('-').map(Number),dow=getDayOfWeek(ds),we=dow===0||dow===6,tod=o===todayOrd,dn=['日','一','二','三','四','五','六'][dow];h+=`<div class="gantt-day-header${we?' weekend':''}${tod?' today':''}" style="width:${dw}px;"><div class="day-num">${p[2]}</div><div class="day-name">${dn}</div></div>`;}h+='</div></div>';h+='<div class="gantt-body" style="position:relative;">';const trp=todayOrd-vs;if(trp>=0&&trp<td)h+=`<div class="gantt-today-line" style="left:${150+trp*dw}px;"></div>`;for(let i=0;i<td;i++){const o=vs+i,l=150+i*dw,d=getDayOfWeek(ordToDateStr(o));if(d===0||d===6)h+=`<div style="position:absolute;top:0;bottom:0;left:${l}px;width:${dw*2}px;background:rgba(0,0,0,.02);pointer-events:none;"></div>`;h+=`<div class="gantt-grid-line" style="left:${l}px;"></div>`;}
+  po.forEach(pn=>{h+=`<div class="phase-separator">📌 ${pn}</div>`;ph[pn].forEach(t=>{const od=dateStrToOrd(t.start),off=od-vs,l=off*dw,w=t.duration*dw-4,pw=Math.round(t.progress/100*w),e=addDaysToStr(t.start,t.duration-1),tt=`${t.name}|${t.progress}%|${t.start}~${e}`;h+=`<div class="gantt-row" ondblclick="openEdit(${t.id})" title="${tt}"><div class="gantt-task-label"><div class="label-name">${t.name}</div><div class="label-owner">${t.owner}|${t.duration}天|${t.progress}%</div></div><div class="gantt-bar-area" style="width:${tw}px;"><div class="gantt-bar-wrapper" style="left:${l}px;width:${w}px;" title="${tt}"><div class="gantt-bar-bg" style="background:${t.color};width:${w}px;"></div><div class="gantt-bar-progress" style="width:${pw}px;background:${t.color};opacity:.85;"></div><div class="gantt-bar-label">${t.name}</div></div></div></div>`;});});
+  h+='</div>';return h;
+}
+function renderWeekView(po,ph,rs,re,dw){const vs=rs-2,ve=re+5,td=ve-vs+1,tw=td*dw;let h='';h+='<div class="gantt-header-row"><div class="gantt-task-label-header">任务</div><div class="gantt-timeline-header" style="width:'+tw+'px;">';let fw=vs;while(getDayOfWeek(ordToDateStr(fw))!==1)fw++;for(let o=fw;o<=ve;o+=7){const ws=ordToDateStr(o),we=ordToDateStr(o+6),p=ws.split('-').map(Number),e=we.split('-').map(Number),cur=o<=todayOrd&&todayOrd<=o+6;h+=`<div style="width:${dw*7}px;text-align:center;font-size:11px;font-weight:600;color:#555;padding:5px 0;${cur?'background:#e8f0fe;':''}">${p[1]}/${p[2]} ~ ${e[1]}/${e[2]}</div>`;}h+='</div></div>';h+='<div class="gantt-body" style="position:relative;">';const trp=todayOrd-vs;if(trp>=0&&trp<td)h+=`<div class="gantt-today-line" style="left:${150+trp*dw}px;"></div>`;for(let i=0;i<td;i++){const o=vs+i,l=150+i*dw,d=getDayOfWeek(ordToDateStr(o));if(d===0||d===6)h+=`<div style="position:absolute;top:0;bottom:0;left:${l}px;width:${dw*2}px;background:rgba(0,0,0,.02);pointer-events:none;"></div>`;h+=`<div class="gantt-grid-line" style="left:${l}px;"></div>`;}
+  po.forEach(pn=>{h+=`<div class="phase-separator">📌 ${pn}</div>`;ph[pn].forEach(t=>{const od=dateStrToOrd(t.start),off=od-vs,l=off*dw,w=t.duration*dw-4,pw=Math.round(t.progress/100*w),e=addDaysToStr(t.start,t.duration-1),tt=`${t.name}|${t.progress}%|${t.start}~${e}`;h+=`<div class="gantt-row" ondblclick="openEdit(${t.id})" title="${tt}"><div class="gantt-task-label"><div class="label-name">${t.name}</div><div class="label-owner">${t.owner}|${t.duration}天|${t.progress}%</div></div><div class="gantt-bar-area" style="width:${tw}px;"><div class="gantt-bar-wrapper" style="left:${l}px;width:${w}px;" title="${tt}"><div class="gantt-bar-bg" style="background:${t.color};width:${w}px;"></div><div class="gantt-bar-progress" style="width:${pw}px;background:${t.color};opacity:.85;"></div><div class="gantt-bar-label">${t.name}</div></div></div></div>`;});});
+  h+='</div>';return h;
+}
+function renderMonthView(po,ph,rs,re,dw){const ss=ordToDateStr(rs),ee=ordToDateStr(re),sy=ss.split('-').map(Number)[0],sm=ss.split('-').map(Number)[1],ey=ee.split('-').map(Number)[0],em=ee.split('-').map(Number)[1],mw=120,tm=(ey-sy)*12+(em-sm)+1,tw=tm*mw;let h='';h+='<div class="gantt-header-row"><div class="gantt-task-label-header">任务</div><div class="gantt-timeline-header" style="width:'+tw+'px;">';const ys={};for(let i=0;i<tm;i++){const yr=sy+Math.floor((sm-1+i)/12);ys[yr]=(ys[yr]||0)+1;}Object.keys(ys).sort().forEach(y=>{h+=`<div class="gantt-year-header" style="width:${ys[y]*mw}px;">${y}年</div>`;});h+='</div></div>';h+='<div class="gantt-header-row"><div class="gantt-task-label-header"></div><div class="gantt-timeline-header" style="width:'+tw+'px;">';for(let i=0;i<tm;i++){const mi=sm-1+i,yr=sy+Math.floor(mi/12),mo=(mi%12)+1,cur=yr===todayStr.split('-').map(Number)[0]&&mo===todayStr.split('-').map(Number)[1];h+=`<div class="gantt-month-header" style="width:${mw}px;${cur?'background:#1a73e8;color:#fff;':''}">${mo}月</div>`;}h+='</div></div>';h+='<div class="gantt-body" style="position:relative;">';const tp=todayStr.split('-').map(Number),tmi=(tp[0]-sy)*12+(tp[1]-sm),dit=getDaysInMonth(tp[0],tp[1]),timr=(tp[2]-1)/dit,tl=150+(tmi+timr)*mw;if(tmi>=0&&tmi<tm)h+=`<div class="gantt-today-line" style="left:${tl}px;"></div>`;for(let i=0;i<=tm;i++){h+=`<div class="gantt-grid-line" style="left:${150+i*mw}px;border-left:1px solid #e8e8e8;"></div>`;}
+  po.forEach(pn=>{h+=`<div class="phase-separator">📌 ${pn}</div>`;ph[pn].forEach(t=>{const p=t.start.split('-').map(Number),mfs=(p[0]-sy)*12+(p[1]-sm),dit2=getDaysInMonth(p[0],p[1]),imr=(p[2]-1)/dit2,l=(mfs+imr)*mw,dm=t.duration/dit2,w=Math.max(mw*dm-2,8),pw=Math.round(t.progress/100*w),e=addDaysToStr(t.start,t.duration-1),tt=`${t.name}|${t.progress}%|${t.start}~${e}`;h+=`<div class="gantt-row" ondblclick="openEdit(${t.id})" title="${tt}"><div class="gantt-task-label"><div class="label-name">${t.name}</div><div class="label-owner">${t.owner}|${t.duration}天|${t.progress}%</div></div><div class="gantt-bar-area" style="width:${tw}px;"><div class="gantt-bar-wrapper" style="left:${l}px;width:${w}px;" title="${tt}"><div class="gantt-bar-bg" style="background:${t.color};width:${w}px;"></div><div class="gantt-bar-progress" style="width:${pw}px;background:${t.color};opacity:.85;"></div><div class="gantt-bar-label">${t.name}</div></div></div></div>`;});});
+  h+='</div>';return h;
+}
+
+// ============================================================
+//  任务操作
+// ============================================================
+function selectTask(id){selectedTaskId=id;renderTaskList();}
+function addTask(){const nm=document.getElementById('f_name').value.trim(),sv=document.getElementById('f_start').value,du=parseInt(document.getElementById('f_duration').value)||1;if(!nm||!sv){alert('请填写任务名称和开始日期');return;}if(!isValidDateStr(sv)){alert('请选择有效的开始日期（YYYY-MM-DD）');return;}const so=dateStrToOrd(sv),rt=ordToDateStr(so);if(rt!==sv){alert(`日期解析异常：${sv}->${rt}`);return;}const nid=ganttData.tasks.length>0?Math.max(...ganttData.tasks.map(x=>x.id))+1:1;const nt={id:nid,phase:document.getElementById('f_phase').value||'未分类',name:nm,owner:document.getElementById('f_owner').value||'未分配',start:sv,duration:du,progress:parseInt(document.getElementById('f_progress').value)||0,color:document.getElementById('f_color').value||'#4CAF50'};const e=addDaysToStr(nt.start,nt.duration-1);ganttData.tasks.push(nt);document.getElementById('f_name').value='';document.getElementById('f_progress').value='0';document.getElementById('f_progress_val').textContent='0';document.getElementById('f_start').value=todayStr;document.getElementById('debugAdd').textContent=`✓ 已添加: ${nt.start} ~ ${e} (${nt.duration}天)`;renderAll();showStatus('githubStatus',`✅ 任务「${nm}」已添加（${nt.start} ~ ${e}）`,'success');setTimeout(()=>showStatus('githubStatus',''),4000);}
+function deleteTask(id){if(!confirm('确定删除这个任务吗？'))return;ganttData.tasks=ganttData.tasks.filter(x=>x.id!==id);renderAll();}
+function openEdit(id){const t=ganttData.tasks.find(x=>x.id===id);if(!t)return;editingTaskId=id;document.getElementById('e_name').value=t.name;document.getElementById('e_phase').value=t.phase;document.getElementById('e_owner').value=t.owner;document.getElementById('e_start').value=t.start;document.getElementById('e_duration').value=t.duration;document.getElementById('e_progress').value=t.progress;document.getElementById('e_progress_val').textContent=t.progress;document.getElementById('e_color').value=t.color;document.getElementById('editModal').classList.add('active');}
+function closeModal(){document.getElementById('editModal').classList.remove('active');editingTaskId=null;}
+function saveEdit(){const t=ganttData.tasks.find(x=>x.id===editingTaskId);if(!t)return;const ns=document.getElementById('e_start').value;if(!isValidDateStr(ns)){alert('日期格式无效');return;}t.name=document.getElementById('e_name').value;t.phase=document.getElementById('e_phase').value;t.owner=document.getElementById('e_owner').value;t.start=ns;t.duration=parseInt(document.getElementById('e_duration').value)||1;t.progress=parseInt(document.getElementById('e_progress').value)||0;t.color=document.getElementById('e_color').value;const e=addDaysToStr(t.start,t.duration-1);showStatus('githubStatus',`✅ 已更新：${t.start} ~ ${e}`,'success');setTimeout(()=>showStatus('githubStatus',''),3000);closeModal();renderAll();}
+
+// ============================================================
+//  GitHub 配置 & 保存（保存时 AES 加密后写入 .enc.json）
+// ============================================================
+function showConfig(){document.getElementById('configModal').classList.add('active');}
+function closeConfig(){document.getElementById('configModal').classList.remove('active');}
+function saveConfig(){const cfg={owner:document.getElementById('cfg_owner').value.trim(),repo:document.getElementById('cfg_repo').value.trim(),branch:document.getElementById('cfg_branch').value.trim()||'main',token:document.getElementById('cfg_token').value.trim(),path:document.getElementById('cfg_path').value.trim()||ENC_FILENAME};localStorage.setItem('github_config',JSON.stringify(cfg));closeConfig();showStatus('githubStatus','✅ GitHub 配置已保存','success');setTimeout(()=>renderAll(),1000);}
+
+async function saveToGitHub(){
+  const saved=localStorage.getItem('github_config');if(!saved){showStatus('githubStatus','⚠️ 请先配置 GitHub 信息','error');showConfig();return;}
+  const cfg=JSON.parse(saved);if(!cfg.token||!cfg.owner||!cfg.repo){showStatus('githubStatus','⚠️ GitHub 配置不完整','error');return;}
+  showStatus('githubStatus','⏳ 正在加密并保存到 GitHub...','info');
+  try{
+    const apiUrl=`https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.path}`;
+    const getRes=await fetch(apiUrl+'?ref='+cfg.branch,{headers:{'Authorization':'token '+cfg.token}});
+    let sha=null;if(getRes.ok)sha=(await getRes.json()).sha;
+    // 明文 ganttData -> AES 加密 -> base64 密文 -> 写入仓库
+    const b64Cipher = encryptData(ganttData);
+    const body = JSON.stringify({ ciphertext: b64Cipher });
+    const encoded = btoa(unescape(encodeURIComponent(body))); // GitHub Contents API 要求 base64 编码的内容
+    const putRes=await fetch(apiUrl,{method:'PUT',headers:{'Authorization':'token '+cfg.token,'Content-Type':'application/json'},body:JSON.stringify({message:'更新加密甘特图数据 - '+new Date().toLocaleString('zh-CN'),content:encoded,branch:cfg.branch,sha:sha})});
+    if(!putRes.ok)throw new Error((await putRes.json()).message||'保存失败');
+    showStatus('githubStatus','✅ 已加密并成功保存到 GitHub！','success');renderLastUpdated();
+  }catch(e){showStatus('githubStatus','❌ 保存失败：'+e.message,'error');}
+}
+
+// ============================================================
+//  导入/导出（操作明文 ganttData；导出为明文 JSON 备份）
+// ============================================================
+function exportJSON(){const d=JSON.stringify(ganttData,null,2),b=new Blob([d],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='gantt-data.json';a.click();URL.revokeObjectURL(u);}
+function importJSON(){document.getElementById('fileInput').click();}
+function handleImport(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=function(ev){try{ganttData=JSON.parse(ev.target.result);renderAll();showStatus('githubStatus','✅ 数据导入成功','success');setTimeout(()=>showStatus('githubStatus',''),3000);}catch(err){showStatus('githubStatus','❌ 文件格式错误','error');}r.readAsText(f);e.target.value='';}
+
+// ============================================================
+//  工具函数
+// ============================================================
+function showStatus(id,msg,type){const el=document.getElementById(id);if(!msg){el.innerHTML='';return;}el.innerHTML=`<div class="status-msg ${type}">${msg}</div>`;}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeConfig();}if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();saveToGitHub();}});
+</script>
+</body>
+</html>
