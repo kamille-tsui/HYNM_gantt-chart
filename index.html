@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>📊 HYNM项目管理在线甘特图</title>
+<title>📊 HYNM Project Management Online Gantt Chart</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -296,7 +296,7 @@
     pointer-events: none;
   }
   .gantt-today-line::before {
-    content: '今日';
+    content: 'Today';
     position: absolute;
     top: -18px;
     left: -12px;
@@ -498,116 +498,116 @@
 <!-- 密码门遮罩 -->
 <div id="pwdOverlay">
   <div id="pwdBox">
-    <h2>🔒 HYNM 甘特图</h2>
-    <p class="sub">请输入访问密码以查看项目甘特图</p>
-    <input type="password" id="pwdInput" placeholder="访问密码" autocomplete="off" autofocus>
-    <button id="pwdSubmit">进入甘特图</button>
+    <h2>🔒 HYNM Gantt Chart</h2>
+    <p class="sub">Please enter the access password to view the project Gantt chart</p>
+    <input type="password" id="pwdInput" placeholder="Access password" autocomplete="off" autofocus>
+    <button id="pwdSubmit">Enter Gantt Chart</button>
     <div id="pwdMsg"></div>
   </div>
 </div>
 
 <div class="header">
   <div>
-    <h1>📊 HYNM项目管理在线甘特图</h1>
+    <h1>📊 HYNM Project Management Online Gantt Chart</h1>
     <div class="info" id="projectInfo"></div>
   </div>
   <div class="actions">
-    <button class="btn btn-warning btn-sm" onclick="showConfig()">⚙️ <span class="lbl">配置</span></button>
-    <button class="btn btn-success btn-sm" onclick="saveToGitHub()">💾 <span class="lbl">保存修改并上传</span></button>
-    <button class="btn btn-primary btn-sm" onclick="exportJSON()">📥 <span class="lbl">导出</span></button>
-    <button class="btn btn-primary btn-sm" onclick="importJSON()">📤 <span class="lbl">导入</span></button>
-    <button class="btn btn-sm" style="background:#fff3cd;color:#856404;" onclick="logoutPwd()">🔓 <span class="lbl">退出</span></button>
+    <!-- GitHub config is hard-coded; no config button needed -->
+    <button class="btn btn-success btn-sm" onclick="saveToGitHub()">💾 <span class="lbl">Save & Upload</span></button>
+    <button class="btn btn-primary btn-sm" onclick="exportJSON()">📥 <span class="lbl">Export</span></button>
+    <button class="btn btn-primary btn-sm" onclick="importJSON()">📤 <span class="lbl">Import</span></button>
+    <button class="btn btn-sm" style="background:#fff3cd;color:#856404;" onclick="logoutPwd()">🔓 <span class="lbl">Logout</span></button>
   </div>
 </div>
 
 <div class="toolbar">
-  <label for="searchInput">搜索：</label>
-  <input type="text" id="searchInput" placeholder="搜索任务名称..." oninput="renderGantt()">
-  <label>阶段筛选：</label>
+  <label for="searchInput">Search:</label>
+  <input type="text" id="searchInput" placeholder="Search task name..." oninput="renderGantt()">
+  <label>Phase filter:</label>
   <select id="phaseFilter" onchange="renderGantt()">
-    <option value="">全部阶段</option>
+    <option value="">All phases</option>
   </select>
-  <label>视图：</label>
+  <label>View:</label>
   <select id="viewMode" onchange="renderGantt()">
-    <option value="day">按天</option>
-    <option value="week">按周</option>
-    <option value="month">按月</option>
+    <option value="day">Day</option>
+    <option value="week">Week</option>
+    <option value="month">Month</option>
   </select>
   <span style="margin-left:auto; font-size:12px; color:#888;" id="lastUpdated"></span>
 </div>
 
 <div class="main-container">
   <div class="sidebar" id="sidebar">
-    <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()"><span class="dot"></span><span id="menuToggleTxt">收起面板</span></button>
+    <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()"><span class="dot"></span><span id="menuToggleTxt">Collapse panel</span></button>
     <div class="sidebar-body" id="sidebarBody">
       <div id="githubStatus"></div>
 
-      <h3>📈 项目统计</h3>
+      <h3>📈 Project Statistics</h3>
       <div class="stats-row" style="flex-direction:column; gap:8px;">
         <div class="stat-card" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px;">
-          <span class="stat-label" style="margin:0;">总任务数</span>
+          <span class="stat-label" style="margin:0;">Total tasks</span>
           <span class="stat-value" id="statTotal" style="font-size:20px;">0</span>
         </div>
         <div class="stat-card" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px;">
-          <span class="stat-label" style="margin:0;">已完成</span>
+          <span class="stat-label" style="margin:0;">Completed</span>
           <span class="stat-value" id="statDone" style="font-size:20px; color:#34a853;">0</span>
         </div>
         <div class="stat-card" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px;">
-          <span class="stat-label" style="margin:0;">进行中</span>
+          <span class="stat-label" style="margin:0;">In progress</span>
           <span class="stat-value" id="statProgress" style="font-size:20px; color:#ff9800;">0</span>
         </div>
         <div class="stat-card" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px;">
-          <span class="stat-label" style="margin:0;">整体进度</span>
+          <span class="stat-label" style="margin:0;">Overall progress</span>
           <span class="stat-value" id="statPercent" style="font-size:20px; color:#ff9800;">0%</span>
         </div>
       </div>
 
-      <h3 style="margin-top:20px;">➕ 添加任务</h3>
+      <h3 style="margin-top:20px;">➕ Add Task</h3>
       <div class="task-form" id="taskForm">
         <div class="form-group">
-          <label>任务名称 *</label>
-          <input type="text" id="f_name" placeholder="输入任务名称">
+          <label>Task name *</label>
+          <input type="text" id="f_name" placeholder="Enter task name">
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label>所属阶段</label>
-            <input type="text" id="f_phase" placeholder="如：开发阶段" value="开发阶段">
+            <label>Phase</label>
+            <input type="text" id="f_phase" placeholder="e.g. Development" value="Development">
           </div>
           <div class="form-group">
-            <label>负责人</label>
-            <input type="text" id="f_owner" placeholder="负责人">
+            <label>Owner</label>
+            <input type="text" id="f_owner" placeholder="Owner">
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label>开始日期 *</label>
+            <label>Start date *</label>
             <input type="date" id="f_start">
           </div>
           <div class="form-group">
-            <label>持续天数 *</label>
-            <input type="number" id="f_duration" placeholder="天数" min="1" value="5">
+            <label>Duration (days) *</label>
+            <input type="number" id="f_duration" placeholder="days" min="1" value="5">
           </div>
         </div>
         <div class="form-group">
-          <label>完成进度：<span id="f_progress_val">0</span>%</label>
+          <label>Progress:<span id="f_progress_val">0</span>%</label>
           <input type="range" id="f_progress" min="0" max="100" value="0" oninput="document.getElementById('f_progress_val').textContent=this.value">
         </div>
         <div class="form-group">
-          <label>颜色</label>
+          <label>Color</label>
           <select id="f_color">
-            <option value="#4CAF50">绿色</option>
-            <option value="#2196F3">蓝色</option>
-            <option value="#FF9800">橙色</option>
-            <option value="#9C27B0">紫色</option>
-            <option value="#F44336">红色</option>
-            <option value="#00BCD4">青色</option>
+            <option value="#4CAF50">Green</option>
+            <option value="#2196F3">Blue</option>
+            <option value="#FF9800">Orange</option>
+            <option value="#9C27B0">Purple</option>
+            <option value="#F44336">Red</option>
+            <option value="#00BCD4">Cyan</option>
           </select>
         </div>
-        <button class="btn btn-success" style="width:100%;" onclick="addTask()">添加任务</button>
+        <button class="btn btn-success" style="width:100%;" onclick="addTask()">Add Task</button>
         <div class="debug-info" id="debugAdd"></div>
       </div>
 
-      <h3>📋 任务列表</h3>
+      <h3>📋 Task List</h3>
       <div class="task-list" id="taskList"></div>
     </div>
   </div>
@@ -617,18 +617,18 @@
 <!-- Edit Task Modal -->
 <div class="modal-overlay" id="editModal">
   <div class="modal">
-    <h2>✏️ 编辑任务</h2>
+    <h2>✏️ Edit Task</h2>
     <div class="form-group">
       <label>任务名称</label>
       <input type="text" id="e_name">
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label>所属阶段</label>
+        <label>Phase</label>
         <input type="text" id="e_phase">
       </div>
       <div class="form-group">
-        <label>负责人</label>
+        <label>Owner</label>
         <input type="text" id="e_owner">
       </div>
     </div>
@@ -638,66 +638,32 @@
         <input type="date" id="e_start">
       </div>
       <div class="form-group">
-        <label>持续天数</label>
+        <label>持续days</label>
         <input type="number" id="e_duration" min="1">
       </div>
     </div>
     <div class="form-group">
-      <label>完成进度：<span id="e_progress_val">0</span>%</label>
+      <label>Progress:<span id="e_progress_val">0</span>%</label>
       <input type="range" id="e_progress" min="0" max="100" oninput="document.getElementById('e_progress_val').textContent=this.value">
     </div>
     <div class="form-group">
-      <label>颜色</label>
+      <label>Color</label>
       <select id="e_color">
-        <option value="#4CAF50">绿色</option>
-        <option value="#2196F3">蓝色</option>
-        <option value="#FF9800">橙色</option>
-        <option value="#9C27B0">紫色</option>
-        <option value="#F44336">红色</option>
-        <option value="#00BCD4">青色</option>
+        <option value="#4CAF50">Green</option>
+        <option value="#2196F3">Blue</option>
+        <option value="#FF9800">Orange</option>
+        <option value="#9C27B0">Purple</option>
+        <option value="#F44336">Red</option>
+        <option value="#00BCD4">Cyan</option>
       </select>
     </div>
     <div class="modal-actions">
-      <button class="btn btn-warning" onclick="closeModal()">取消</button>
-      <button class="btn btn-success" onclick="saveEdit()">保存</button>
+      <button class="btn btn-warning" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-success" onclick="saveEdit()">Save</button>
     </div>
   </div>
 </div>
 
-<!-- GitHub Config Modal -->
-<div class="modal-overlay" id="configModal">
-  <div class="modal">
-    <h2>⚙️ GitHub 配置</h2>
-    <p style="font-size:13px; color:#666; margin-bottom:15px; line-height:1.6;">
-      配置 GitHub 信息后，可以将甘特图数据保存回仓库，实现多人协作实时更新。<br>
-      需要 <code style="background:#f0f0f0;padding:1px 4px;border-radius:2px;">repo</code> 权限的 Personal Access Token。
-    </p>
-    <div class="form-group">
-      <label>GitHub 用户名</label>
-      <input type="text" id="cfg_owner" placeholder="如：octocat">
-    </div>
-    <div class="form-group">
-      <label>仓库名称</label>
-      <input type="text" id="cfg_repo" placeholder="如：gantt-chart">
-    </div>
-    <div class="form-group">
-      <label>分支名称</label>
-      <input type="text" id="cfg_branch" placeholder="如：main" value="main">
-    </div>
-    <div class="form-group">
-      <label>Personal Access Token</label>
-      <input type="password" id="cfg_token" placeholder="ghp_xxxxxxxxxxxx">
-    </div>
-    <div class="form-group">
-      <label>数据文件路径</label>
-      <input type="text" id="cfg_path" placeholder="如：gantt-data.json" value="gantt-data.json">
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-warning" onclick="closeConfig()">取消</button>
-      <button class="btn btn-success" onclick="saveConfig()">保存配置</button>
-    </div>
-  </div>
-</div>
 
 <input type="file" id="fileInput" accept=".json" style="display:none;" onchange="handleImport(event)">
 
@@ -707,6 +673,15 @@
 // ============================================================
 const PASSWORD_HASH = 'e9e2386b6ca004a069463d3223209d8ac62ced2d79425af37ecebae16e3b9362';
 const PWD_STORAGE_KEY = 'gantt_pwd_verified';
+// Hard-coded GitHub configuration (do not expose token in client-side code for public repos;
+// this file is intended for a private/internal deployment as requested by the user).
+const GITHUB_CONFIG = {
+  owner: 'kamille-tsui',
+  repo: 'HYNM_gantt-chart',
+  branch: 'main',
+  token: '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',
+  path: 'gantt-data.json'
+};
 
 async function sha256Hex(str) {
   const buf = new TextEncoder().encode(str);
@@ -718,8 +693,8 @@ async function submitPassword() {
   const input = document.getElementById('pwdInput');
   const msg = document.getElementById('pwdMsg');
   const pw = input.value;
-  if (!pw) { msg.className = 'err'; msg.textContent = '请输入密码'; return; }
-  msg.className = 'info'; msg.textContent = '验证中...';
+  if (!pw) { msg.className = 'err'; msg.textContent = 'Please enter the password'; return; }
+  msg.className = 'info'; msg.textContent = 'Verifying...';
   const hash = await sha256Hex(pw);
   if (hash === PASSWORD_HASH) {
     sessionStorage.setItem(PWD_STORAGE_KEY, '1');
@@ -727,7 +702,7 @@ async function submitPassword() {
     msg.textContent = '';
     if (typeof init === 'function' && !window.__ganttInited) { window.__ganttInited = true; init(); }
   } else {
-    msg.className = 'err'; msg.textContent = '密码错误，请重试';
+    msg.className = 'err'; msg.textContent = 'Wrong password, please try again';
     input.value = ''; input.focus();
   }
 }
@@ -744,11 +719,11 @@ document.getElementById('pwdInput').addEventListener('keydown', e => { if (e.key
 function toggleSidebar() {
   const sb = document.getElementById('sidebar');
   sb.classList.toggle('collapsed');
-  document.getElementById('menuToggleTxt').textContent = sb.classList.contains('collapsed') ? '展开面板' : '收起面板';
+  document.getElementById('menuToggleTxt').textContent = sb.classList.contains('collapsed') ? 'Expand panel' : 'Collapse panel';
 }
 
 // ============================================================
-//  日期系统 v2 —— 基于 Ordinal（序天数），彻底消除时区问题
+//  日期系统 v2 —— 基于 Ordinal（序days），彻底消除时区问题
 // ============================================================
 function dateStrToOrd(dateStr) {
   const [y, m, d] = dateStr.split('-').map(Number);
@@ -806,38 +781,27 @@ async function init() {
       '<div class="status-msg error">⚠️ ' + e.message + '</div>';
     ganttData = getDefaultData();
   }
-  const saved = localStorage.getItem('github_config');
-  if (saved) {
-    try {
-      const cfg = JSON.parse(saved);
-      document.getElementById('cfg_owner').value = cfg.owner || '';
-      document.getElementById('cfg_repo').value = cfg.repo || '';
-      document.getElementById('cfg_branch').value = cfg.branch || 'main';
-      document.getElementById('cfg_token').value = cfg.token || '';
-      document.getElementById('cfg_path').value = cfg.path || 'gantt-data.json';
-      showStatus('githubStatus', '✅ GitHub 已配置，可以保存到仓库', 'success');
-    } catch(e) {}
-  } else {
-    showStatus('githubStatus', '⚠️ 未配置 GitHub，数据仅保存在本地。点击右上角「配置GitHub」开启协作功能。', 'info');
-  }
+  // GitHub configuration is hard-coded (GITHUB_CONFIG); show ready status.
+  showStatus('githubStatus', '✅ GitHub configured (kamille-tsui / HYNM_gantt-chart). Changes can be saved directly.', 'success');
+  setTimeout(() => { const el=document.getElementById('githubStatus'); if(el)el.innerHTML=''; }, 4000);
   document.getElementById('f_start').value = todayStr;
   renderAll();
 }
 
 function getDefaultData() {
   return {
-    project: { name: '我的项目', manager: '未设置', startDate: '2026-08-01', endDate: '2099-12-31' },
+    project: { name: 'My Project', manager: 'Not set', startDate: '2026-08-01', endDate: '2099-12-31' },
     tasks: [
-      { id: 1, phase: '启动阶段', name: '项目立项', owner: '张三', start: '2026-08-01', duration: 3, progress: 100, color: '#4CAF50' },
-      { id: 2, phase: '启动阶段', name: '需求调研', owner: '李四', start: '2026-08-04', duration: 5, progress: 80, color: '#4CAF50' },
-      { id: 3, phase: '设计阶段', name: 'UI设计', owner: '王五', start: '2026-08-09', duration: 7, progress: 40, color: '#2196F3' },
-      { id: 4, phase: '设计阶段', name: '架构设计', owner: '赵六', start: '2026-08-09', duration: 5, progress: 60, color: '#2196F3' },
-      { id: 5, phase: '开发阶段', name: '前端开发', owner: '王五', start: '2026-08-16', duration: 10, progress: 10, color: '#FF9800' },
-      { id: 6, phase: '开发阶段', name: '后端开发', owner: '赵六', start: '2026-08-16', duration: 12, progress: 5, color: '#FF9800' },
-      { id: 7, phase: '测试阶段', name: '集成测试', owner: '李四', start: '2026-08-28', duration: 5, progress: 0, color: '#9C27B0' },
-      { id: 8, phase: '测试阶段', name: '验收测试', owner: '张三', start: '2026-09-02', duration: 5, progress: 0, color: '#9C27B0' },
-      { id: 9, phase: '上线阶段', name: '部署上线', owner: '赵六', start: '2026-09-07', duration: 3, progress: 0, color: '#F44336' },
-      { id: 10, phase: '上线阶段', name: '项目总结', owner: '张三', start: '2026-09-10', duration: 5, progress: 0, color: '#F44336' }
+      { id: 1, phase: 'Initiation', name: '项目立项', owner: '张三', start: '2026-08-01', duration: 3, progress: 100, color: '#4CAF50' },
+      { id: 2, phase: 'Initiation', name: '需求调研', owner: '李四', start: '2026-08-04', duration: 5, progress: 80, color: '#4CAF50' },
+      { id: 3, phase: 'Design', name: 'UI设计', owner: '王五', start: '2026-08-09', duration: 7, progress: 40, color: '#2196F3' },
+      { id: 4, phase: 'Design', name: '架构设计', owner: '赵六', start: '2026-08-09', duration: 5, progress: 60, color: '#2196F3' },
+      { id: 5, phase: 'Development', name: '前端开发', owner: '王五', start: '2026-08-16', duration: 10, progress: 10, color: '#FF9800' },
+      { id: 6, phase: 'Development', name: '后端开发', owner: '赵六', start: '2026-08-16', duration: 12, progress: 5, color: '#FF9800' },
+      { id: 7, phase: 'Testing', name: '集成测试', owner: '李四', start: '2026-08-28', duration: 5, progress: 0, color: '#9C27B0' },
+      { id: 8, phase: 'Testing', name: '验收测试', owner: '张三', start: '2026-09-02', duration: 5, progress: 0, color: '#9C27B0' },
+      { id: 9, phase: 'Deployment', name: '部署上线', owner: '赵六', start: '2026-09-07', duration: 3, progress: 0, color: '#F44336' },
+      { id: 10, phase: 'Deployment', name: '项目总结', owner: '张三', start: '2026-09-10', duration: 5, progress: 0, color: '#F44336' }
     ]
   };
 }
@@ -856,7 +820,7 @@ function renderAll() {
 function renderProjectInfo() {
   const p = ganttData.project;
   document.getElementById('projectInfo').textContent =
-    `${p.name} | 负责人：${p.manager} | ${p.startDate} ~ ${p.endDate}`;
+    `${p.name} | Owner：${p.manager} | ${p.startDate} – ${p.endDate}`;
 }
 function renderStats() {
   const tasks = ganttData.tasks;
@@ -873,7 +837,7 @@ function renderPhaseFilter() {
   const sel = document.getElementById('phaseFilter');
   const cur = sel.value;
   const phases = [...new Set(ganttData.tasks.map(t => t.phase))].sort();
-  sel.innerHTML = '<option value="">全部阶段</option>' + phases.map(p => `<option value="${p}">${p}</option>`).join('');
+  sel.innerHTML = '<option value="">All phases</option>' + phases.map(p => `<option value="${p}">${p}</option>`).join('');
   sel.value = cur;
 }
 function renderTaskList() {
@@ -882,13 +846,13 @@ function renderTaskList() {
     <div class="task-item${t.id===selectedTaskId?' selected':''}" onclick="selectTask(${t.id})" ondblclick="openEdit(${t.id})">
       <button class="delete-btn" onclick="event.stopPropagation();deleteTask(${t.id})">✕</button>
       <div class="task-name">${t.name}</div>
-      <div class="task-meta"><span>${t.owner}</span><span>${t.duration}天</span><span>${t.progress}%</span></div>
+      <div class="task-meta"><span>${t.owner}</span><span>${t.duration}d</span><span>${t.progress}%</span></div>
       <div class="task-progress-bar"><div class="task-progress-fill" style="width:${t.progress}%;background:${t.color}"></div></div>
     </div>`).join('');
 }
 function renderLastUpdated() {
   const el = document.getElementById('lastUpdated');
-  if (ganttData && ganttData.lastUpdated) el.textContent = '最后更新：' + ganttData.lastUpdated;
+  if (ganttData && ganttData.lastUpdated) el.textContent = 'Last updated: ' + ganttData.lastUpdated;
 }
 
 // ============================================================
@@ -918,10 +882,10 @@ function renderGantt() {
   let html = '';
   const colors = [...new Set(tasks.map(t => t.color))];
   html += '<div class="legend">';
-  html += '<span style="font-weight:600; margin-right:5px;">图例：</span>';
+  html += '<span style="font-weight:600; margin-right:5px;">Legend:</span>';
   const colorMap = { '#4CAF50':'启动/完成','#2196F3':'设计','#FF9800':'开发','#9C27B0':'测试','#F44336':'上线','#00BCD4':'其他' };
   colors.forEach(c => { html += `<div class="legend-item"><div class="legend-color" style="background:${c}"></div>${colorMap[c]||c}</div>`; });
-  html += '<div class="legend-item" style="margin-left:auto;"><div class="legend-color" style="background:#f44336; width:2px; height:14px;"></div>今日</div>';
+  html += '<div class="legend-item" style="margin-left:auto;"><div class="legend-color" style="background:#f44336; width:2px; height:14px;"></div>Today</div>';
   html += '</div>';
   if (view === 'month') html += renderMonthView(phaseOrder, phases, rangeStartOrd, rangeEndOrd, dayWidth);
   else if (view === 'week') html += renderWeekView(phaseOrder, phases, rangeStartOrd, rangeEndOrd, dayWidth);
@@ -965,9 +929,9 @@ function renderDayView(phaseOrder, phases, rangeStartOrd, rangeEndOrd, dayWidth)
       const width = task.duration * dayWidth - 4;
       const progressWidth = Math.round((task.progress / 100) * width);
       const endStr = addDaysToStr(task.start, task.duration - 1);
-      const tooltip = `${task.name} | ${task.progress}% | ${task.start} ~ ${endStr}`;
+      const tooltip = `${task.name} | ${task.progress}% | ${task.start} – ${endStr}`;
       html += `<div class="gantt-row" ondblclick="openEdit(${task.id})" title="${tooltip}">`;
-      html += `<div class="gantt-task-label"><div class="label-name">${task.name}</div><div class="label-owner">${task.owner} | ${task.duration}天 | ${task.progress}%</div></div>`;
+      html += `<div class="gantt-task-label"><div class="label-name">${task.name}</div><div class="label-owner">${task.owner} | ${task.duration}d | ${task.progress}%</div></div>`;
       html += `<div class="gantt-bar-area" style="width:${timelineWidth}px;">`;
       html += `<div class="gantt-bar-wrapper" style="left:${left}px;width:${width}px;" title="${tooltip}">`;
       html += `<div class="gantt-bar-bg" style="background:${task.color};width:${width}px;"></div>`;
@@ -993,7 +957,7 @@ function renderWeekView(phaseOrder, phases, rangeStartOrd, rangeEndOrd, dayWidth
     const [sy, sm, sd] = ordToDateStr(ord).split('-').map(Number);
     const [ey, em, ed] = ordToDateStr(ord + 6).split('-').map(Number);
     const isCurrentWeek = ord <= todayOrd && todayOrd <= ord + 6;
-    html += `<div style="width:${dayWidth*7}px;text-align:center;font-size:11px;font-weight:600;color:#555;padding:5px 0;${isCurrentWeek?'background:#e8f0fe;':''}">${sm}/${sd} ~ ${em}/${ed}</div>`;
+    html += `<div style="width:${dayWidth*7}px;text-align:center;font-size:11px;font-weight:600;color:#555;padding:5px 0;${isCurrentWeek?'background:#e8f0fe;':''}">${sm}/${sd} – ${em}/${ed}</div>`;
   }
   html += '</div></div>';
   html += '<div class="gantt-body" style="position:relative;">';
@@ -1013,9 +977,9 @@ function renderWeekView(phaseOrder, phases, rangeStartOrd, rangeEndOrd, dayWidth
       const width = task.duration * dayWidth - 4;
       const progressWidth = Math.round((task.progress / 100) * width);
       const endStr = addDaysToStr(task.start, task.duration - 1);
-      const tooltip = `${task.name} | ${task.progress}% | ${task.start} ~ ${endStr}`;
+      const tooltip = `${task.name} | ${task.progress}% | ${task.start} – ${endStr}`;
       html += `<div class="gantt-row" ondblclick="openEdit(${task.id})" title="${tooltip}">`;
-      html += `<div class="gantt-task-label"><div class="label-name">${task.name}</div><div class="label-owner">${task.owner} | ${task.duration}天 | ${task.progress}%</div></div>`;
+      html += `<div class="gantt-task-label"><div class="label-name">${task.name}</div><div class="label-owner">${task.owner} | ${task.duration}d | ${task.progress}%</div></div>`;
       html += `<div class="gantt-bar-area" style="width:${timelineWidth}px;">`;
       html += `<div class="gantt-bar-wrapper" style="left:${left}px;width:${width}px;" title="${tooltip}">`;
       html += `<div class="gantt-bar-bg" style="background:${task.color};width:${width}px;"></div>`;
@@ -1066,9 +1030,9 @@ function renderMonthView(phaseOrder, phases, rangeStartOrd, rangeEndOrd, baseDay
       const width = Math.max(monthWidth * (task.duration / daysInTaskMonth) - 2, 8);
       const progressWidth = Math.round((task.progress / 100) * width);
       const endStr = addDaysToStr(task.start, task.duration - 1);
-      const tooltip = `${task.name} | ${task.progress}% | ${task.start} ~ ${endStr}`;
+      const tooltip = `${task.name} | ${task.progress}% | ${task.start} – ${endStr}`;
       html += `<div class="gantt-row" ondblclick="openEdit(${task.id})" title="${tooltip}">`;
-      html += `<div class="gantt-task-label"><div class="label-name">${task.name}</div><div class="label-owner">${task.owner} | ${task.duration}天 | ${task.progress}%</div></div>`;
+      html += `<div class="gantt-task-label"><div class="label-name">${task.name}</div><div class="label-owner">${task.owner} | ${task.duration}d | ${task.progress}%</div></div>`;
       html += `<div class="gantt-bar-area" style="width:${timelineWidth}px;">`;
       html += `<div class="gantt-bar-wrapper" style="left:${left}px;width:${width}px;" title="${tooltip}">`;
       html += `<div class="gantt-bar-bg" style="background:${task.color};width:${width}px;"></div>`;
@@ -1088,23 +1052,23 @@ function addTask() {
   const name = document.getElementById('f_name').value.trim();
   const startVal = document.getElementById('f_start').value;
   const duration = parseInt(document.getElementById('f_duration').value) || 1;
-  if (!name || !startVal) { alert('请填写任务名称和开始日期'); return; }
-  if (!isValidDateStr(startVal)) { alert('请选择有效的开始日期（格式：YYYY-MM-DD）'); return; }
+  if (!name || !startVal) { alert('Please fill in the task name and start date'); return; }
+  if (!isValidDateStr(startVal)) { alert('Please choose a valid start date (format: YYYY-MM-DD)'); return; }
   const startOrd = dateStrToOrd(startVal);
-  if (ordToDateStr(startOrd) !== startVal) { alert(`日期解析异常`); return; }
+  if (ordToDateStr(startOrd) !== startVal) { alert(`Date parsing error`); return; }
   const newId = ganttData.tasks.length > 0 ? Math.max(...ganttData.tasks.map(t => t.id)) + 1 : 1;
-  ganttData.tasks.push({ id: newId, phase: document.getElementById('f_phase').value || '未分类', name,
-    owner: document.getElementById('f_owner').value || '未分配', start: startVal, duration,
+  ganttData.tasks.push({ id: newId, phase: document.getElementById('f_phase').value || 'Uncategorized', name,
+    owner: document.getElementById('f_owner').value || 'Unassigned', start: startVal, duration,
     progress: parseInt(document.getElementById('f_progress').value) || 0,
     color: document.getElementById('f_color').value || '#4CAF50' });
   document.getElementById('f_name').value = '';
   document.getElementById('f_progress').value = '0'; document.getElementById('f_progress_val').textContent = '0';
   document.getElementById('f_start').value = todayStr;
-  document.getElementById('debugAdd').textContent = `✓ 已添加: ${startVal} ~ ${addDaysToStr(startVal, duration-1)} (${duration}天)`;
+  document.getElementById('debugAdd').textContent = `✓ Added: ${startVal} – ${addDaysToStr(startVal, duration-1)} (${duration}d)`;
   renderAll();
-  showStatus('githubStatus', `✅ 任务「${name}」已添加`, 'success'); setTimeout(() => showStatus('githubStatus', ''), 4000);
+  showStatus('githubStatus', `✅ Task "${name}" has been added`, 'success'); setTimeout(() => showStatus('githubStatus', ''), 4000);
 }
-function deleteTask(id) { if (!confirm('确定删除这个任务吗？')) return; ganttData.tasks = ganttData.tasks.filter(t => t.id !== id); renderAll(); }
+function deleteTask(id) { if (!confirm('Are you sure you want to delete this task?')) return; ganttData.tasks = ganttData.tasks.filter(t => t.id !== id); renderAll(); }
 function openEdit(id) {
   const task = ganttData.tasks.find(t => t.id === id); if (!task) return; editingTaskId = id;
   document.getElementById('e_name').value = task.name; document.getElementById('e_phase').value = task.phase;
@@ -1116,49 +1080,39 @@ function openEdit(id) {
 function closeModal() { document.getElementById('editModal').classList.remove('active'); editingTaskId = null; }
 function saveEdit() {
   const task = ganttData.tasks.find(t => t.id === editingTaskId); if (!task) return;
-  const newStart = document.getElementById('e_start').value; if (!isValidDateStr(newStart)) { alert('日期格式无效'); return; }
+  const newStart = document.getElementById('e_start').value; if (!isValidDateStr(newStart)) { alert('Invalid date format'); return; }
   task.name = document.getElementById('e_name').value; task.phase = document.getElementById('e_phase').value;
   task.owner = document.getElementById('e_owner').value; task.start = newStart;
   task.duration = parseInt(document.getElementById('e_duration').value) || 1;
   task.progress = parseInt(document.getElementById('e_progress').value) || 0; task.color = document.getElementById('e_color').value;
-  showStatus('githubStatus', `✅ 已更新：${task.start} ~ ${addDaysToStr(task.start, task.duration-1)}`, 'success');
+  showStatus('githubStatus', `✅ Updated: ${task.start} – ${addDaysToStr(task.start, task.duration-1)}`, 'success');
   setTimeout(() => showStatus('githubStatus', ''), 3000); closeModal(); renderAll();
 }
 
 // ============================================================
-//  GitHub 配置 & 保存
+//  GitHub 配置 & Save
 // ============================================================
-function showConfig() { document.getElementById('configModal').classList.add('active'); }
-function closeConfig() { document.getElementById('configModal').classList.remove('active'); }
-function saveConfig() {
-  const cfg = { owner: document.getElementById('cfg_owner').value.trim(), repo: document.getElementById('cfg_repo').value.trim(),
-    branch: document.getElementById('cfg_branch').value.trim() || 'main', token: document.getElementById('cfg_token').value.trim(),
-    path: document.getElementById('cfg_path').value.trim() || 'gantt-data.json' };
-  localStorage.setItem('github_config', JSON.stringify(cfg)); closeConfig();
-  showStatus('githubStatus', '✅ GitHub 配置已保存', 'success'); setTimeout(() => renderAll(), 1000);
-}
+
 async function saveToGitHub() {
-  const saved = localStorage.getItem('github_config');
-  if (!saved) { showStatus('githubStatus', '⚠️ 请先配置 GitHub 信息', 'error'); showConfig(); return; }
-  const cfg = JSON.parse(saved);
-  if (!cfg.token || !cfg.owner || !cfg.repo) { showStatus('githubStatus', '⚠️ GitHub 配置不完整', 'error'); return; }
-  showStatus('githubStatus', '⏳ 正在保存到 GitHub...', 'info');
+  const cfg = GITHUB_CONFIG;
+  if (!cfg.token || !cfg.owner || !cfg.repo) { showStatus('githubStatus', '⚠️ GitHub configuration is missing', 'error'); return; }
+  showStatus('githubStatus', '⏳ Saving to GitHub...', 'info');
   try {
     const apiUrl = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.path}`;
     const getRes = await fetch(apiUrl + '?ref=' + cfg.branch, { headers: { 'Authorization': 'token ' + cfg.token } });
     let sha = null; if (getRes.ok) sha = (await getRes.json()).sha;
-    ganttData.lastUpdated = new Date().toLocaleString('zh-CN');
+    ganttData.lastUpdated = new Date().toISOString();
     const content = JSON.stringify(ganttData, null, 2);
     const encoded = btoa(unescape(encodeURIComponent(content)));
     const putRes = await fetch(apiUrl, { method: 'PUT', headers: { 'Authorization': 'token ' + cfg.token, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: '更新甘特图数据 - ' + ganttData.lastUpdated, content: encoded, branch: cfg.branch, sha }) });
-    if (!putRes.ok) throw new Error((await putRes.json()).message || '保存失败');
-    showStatus('githubStatus', '✅ 已成功保存到 GitHub！', 'success'); renderLastUpdated();
-  } catch (e) { showStatus('githubStatus', '❌ 保存失败：' + e.message, 'error'); }
+      body: JSON.stringify({ message: 'Update Gantt data - ' + ganttData.lastUpdated, content: encoded, branch: cfg.branch, sha }) });
+    if (!putRes.ok) throw new Error((await putRes.json()).message || 'Save failed');
+    showStatus('githubStatus', '✅ Successfully saved to GitHub!', 'success'); renderLastUpdated();
+  } catch (e) { showStatus('githubStatus', '❌ Save failed: ' + e.message, 'error'); }
 }
 
 // ============================================================
-//  导入/导出
+//  Import/Export
 // ============================================================
 function exportJSON() {
   const data = JSON.stringify(ganttData, null, 2);
@@ -1170,7 +1124,7 @@ function importJSON() { document.getElementById('fileInput').click(); }
 function handleImport(e) {
   const file = e.target.files[0]; if (!file) return;
   const reader = new FileReader();
-  reader.onload = function(ev) { try { ganttData = JSON.parse(ev.target.result); renderAll(); showStatus('githubStatus', '✅ 数据导入成功', 'success'); setTimeout(() => showStatus('githubStatus', ''), 3000); } catch (err) { showStatus('githubStatus', '❌ 文件格式错误', 'error'); } };
+  reader.onload = function(ev) { try { ganttData = JSON.parse(ev.target.result); renderAll(); showStatus('githubStatus', '✅ 数据Import成功', 'success'); setTimeout(() => showStatus('githubStatus', ''), 3000); } catch (err) { showStatus('githubStatus', '❌ File format error', 'error'); } };
   reader.readAsText(file); e.target.value = '';
 }
 function showStatus(elementId, msg, type) { const el = document.getElementById(elementId); if (!msg) { el.innerHTML = ''; return; } el.innerHTML = `<div class="status-msg ${type}">${msg}</div>`; }
