@@ -1,0 +1,120 @@
+{
+  "project": {
+    "name": "HYNM Online Gantt Chart",
+    "manager": "Lowen_Tsui",
+    "startDate": "2026-08-01",
+    "endDate": "2099-12-31"
+  },
+  "tasks": [
+    {
+      "id": 1,
+      "phase": "Initiation",
+      "name": "Project Initiation",
+      "owner": "KUN",
+      "start": "2026-07-25",
+      "duration": 4,
+      "progress": 100,
+      "color": "#4CAF50"
+    },
+    {
+      "id": 2,
+      "phase": "Initiation",
+      "name": "Producer Selection",
+      "owner": "ikun",
+      "start": "2026-08-04",
+      "duration": 3,
+      "progress": 80,
+      "color": "#00BCD4"
+    },
+    {
+      "id": 3,
+      "phase": "Design",
+      "name": "UI Design",
+      "owner": "KUN",
+      "start": "2026-08-07",
+      "duration": 7,
+      "progress": 40,
+      "color": "#2196F3"
+    },
+    {
+      "id": 4,
+      "phase": "Design",
+      "name": "Architecture Design",
+      "owner": "KUN",
+      "start": "2026-08-09",
+      "duration": 5,
+      "progress": 60,
+      "color": "#2196F3"
+    },
+    {
+      "id": 5,
+      "phase": "Development",
+      "name": "Frontend Dev",
+      "owner": "KUN",
+      "start": "2026-08-13",
+      "duration": 10,
+      "progress": 10,
+      "color": "#FF9800"
+    },
+    {
+      "id": 6,
+      "phase": "Development",
+      "name": "Backend Dev",
+      "owner": "KUN",
+      "start": "2026-08-14",
+      "duration": 12,
+      "progress": 5,
+      "color": "#FF9800"
+    },
+    {
+      "id": 7,
+      "phase": "Development",
+      "name": "RAP Module",
+      "owner": "KUN",
+      "start": "2026-08-15",
+      "duration": 5,
+      "progress": 35,
+      "color": "#9C27B0"
+    },
+    {
+      "id": 8,
+      "phase": "Development",
+      "name": "Basketball Module",
+      "owner": "KUN",
+      "start": "2026-08-17",
+      "duration": 5,
+      "progress": 29,
+      "color": "#9C27B0"
+    },
+    {
+      "id": 9,
+      "phase": "Deployment",
+      "name": "Music Integration",
+      "owner": "Producer Team",
+      "start": "2026-08-24",
+      "duration": 3,
+      "progress": 64,
+      "color": "#F44336"
+    },
+    {
+      "id": 10,
+      "phase": "Deployment",
+      "name": "Final Review",
+      "owner": "iKUN",
+      "start": "2026-08-26",
+      "duration": 8,
+      "progress": 36,
+      "color": "#F44336"
+    },
+    {
+      "id": 11,
+      "phase": "Development",
+      "name": "Sintering Process",
+      "owner": "Cai",
+      "start": "2026-08-06",
+      "duration": 5,
+      "progress": 18,
+      "color": "#4CAF50"
+    }
+  ]
+}
