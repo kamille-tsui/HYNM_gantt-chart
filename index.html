@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📊 HYNM项目管理在线甘特图</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Microsoft YaHei', 'Segoe UI', sans-serif;
+    background: #f5f7fa;
+    color: #333;
+    min-height: 100vh;
+  }
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+    color: #fff;
+    padding: 20px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+  .header h1 { font-size: 24px; font-weight: 600; }
+  .header .info { font-size: 14px; opacity: 0.9; }
+  .header .actions { display: flex; gap: 10px; align-items: center; }
+  .btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  .btn-primary { background: #fff; color: #1a73e8; }
+  .btn-primary:hover { background: #e8f0fe; }
+  .btn-success { background: #34a853; color: #fff; }
+  .btn-success:hover { background: #2d8f47; }
+  .btn-warning { background: #fbbc04; color: #333; }
+  .btn-warning:hover { background: #e8a800; }
+  .btn-sm { padding: 4px 10px; font-size: 12px; }
+
+  /* Toolbar */
+  .toolbar {
+    background: #fff;
+    padding: 12px 30px;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    border-bottom: 1px solid #e0e0e0;
+    flex-wrap: wrap;
+  }
+  .toolbar label { font-size: 13px; color: #666; font-weight: 500; }
+  .toolbar input, .toolbar select {
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+  .toolbar input:focus, .toolbar select:focus {
+    outline: none;
+    border-color: #1a73e8;
+  }
+
+  /* Main layout */
+  .main-container {
+    display: flex;
+    height: calc(100vh - 130px);
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 320px;
+    min-width: 320px;
+    background: #fff;
+    border-right: 1px solid #e0e0e0;
+    overflow-y: auto;
+    padding: 15px;
+  }
+  .sidebar h3 {
+    font-size: 15px;
+    margin-bottom: 12px;
+    color: #1a73e8;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .task-form {
+    background: #f9fafb;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #e8eaed;
+  }
+  .task-form .form-group { margin-bottom: 10px; }
+  .task-form label {
+    display: block;
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 3px;
+    font-weight: 500;
+  }
+  .task-form input, .task-form select {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+  .task-form .form-row { display: flex; gap: 8px; }
+  .task-form .form-row .form-group { flex: 1; }
+  .task-list { margin-top: 10px; }
+  .task-item {
+    padding: 10px 12px;
+    background: #fff;
+    border: 1px solid #e8eaed;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .task-item:hover { border-color: #1a73e8; box-shadow: 0 1px 4px rgba(26,115,232,0.15); }
+  .task-item.selected { border-color: #1a73e8; background: #e8f0fe; }
+  .task-item .task-name { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .task-item .task-meta { font-size: 11px; color: #888; display: flex; gap: 8px; }
+  .task-item .task-progress-bar {
+    height: 4px;
+    background: #e8eaed;
+    border-radius: 2px;
+    margin-top: 6px;
+    overflow: hidden;
+  }
+  .task-item .task-progress-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+  .task-item .delete-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #ff4d4f;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    cursor: pointer;
+    display: none;
+  }
+  .task-item:hover .delete-btn { display: block; }
+
+  /* Gantt area */
+  .gantt-area {
+    flex: 1;
+    overflow: auto;
+    background: #fff;
+    padding: 20px;
+  }
+  .gantt-header-row { display: flex; margin-bottom: 5px; }
+  .gantt-task-label-header {
+    width: 150px;
+    min-width: 150px;
+    font-size: 12px;
+    color: #666;
+    font-weight: 600;
+    padding: 5px;
+    border-bottom: 2px solid #e0e0e0;
+  }
+  .gantt-timeline-header { display: flex; border-bottom: 2px solid #e0e0e0; }
+  .gantt-day-header {
+    width: 28px;
+    min-width: 28px;
+    text-align: center;
+    font-size: 10px;
+    color: #888;
+    padding: 5px 0;
+    border-right: 1px solid #f0f0f0;
+  }
+  .gantt-day-header.weekend { background: #f9f9f9; color: #bbb; }
+  .gantt-day-header.today { background: #1a73e8; color: #fff; font-weight: 700; border-radius: 2px; }
+  .gantt-day-header .day-num { font-size: 11px; font-weight: 600; }
+  .gantt-day-header .day-name { font-size: 9px; }
+  .gantt-month-header {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #555;
+    padding: 3px 0;
+    background: #eef2f7;
+    border-right: 1px solid #ddd;
+  }
+  .gantt-year-header {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: #333;
+    padding: 5px 0;
+    border-right: 2px solid #ccc;
+    background: #e8edf3;
+  }
+
+  .gantt-body { position: relative; }
+  .gantt-row {
+    display: flex;
+    align-items: center;
+    height: 42px;
+    border-bottom: 1px solid #f5f5f5;
+  }
+  .gantt-row:hover { background: #fafbfc; }
+  .gantt-task-label {
+    width: 150px;
+    min-width: 150px;
+    padding: 0 8px;
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    border-right: 1px solid #e8eaed;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .gantt-task-label .label-name { font-weight: 600; color: #333; }
+  .gantt-task-label .label-owner { font-size: 10px; color: #999; margin-top: 2px; }
+  .gantt-bar-area {
+    position: relative;
+    height: 100%;
+    flex: 1;
+  }
+  .gantt-grid-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: #f0f0f0;
+  }
+  .gantt-bar-wrapper {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 24px;
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: box-shadow 0.2s;
+  }
+  .gantt-bar-wrapper:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+  .gantt-bar-bg {
+    width: 100%;
+    height: 100%;
+    opacity: 0.25;
+    border-radius: 4px;
+  }
+  .gantt-bar-progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s;
+  }
+  .gantt-bar-label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    pointer-events: none;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .gantt-today-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #f44336;
+    z-index: 10;
+    pointer-events: none;
+  }
+  .gantt-today-line::before {
+    content: '今日';
+    position: absolute;
+    top: -18px;
+    left: -12px;
+    background: #f44336;
+    color: #fff;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  .phase-separator {
+    height: 28px;
+    display: flex;
+    align-items: center;
+    background: #e8f0fe;
+    font-size: 12px;
+    font-weight: 700;
+    color: #1a73e8;
+    padding: 0 10px;
+    margin-top: 5px;
+    border-radius: 4px;
+  }
+
+  .progress-edit { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+  .progress-edit input[type="range"] { flex: 1; }
+  .progress-edit .progress-val { font-size: 13px; font-weight: 600; color: #1a73e8; min-width: 40px; }
+
+  .status-msg {
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    margin: 10px 0;
+    display: none;
+  }
+  .status-msg.success { background: #e6f4ea; color: #34a853; display: block; }
+  .status-msg.error { background: #fce8e8; color: #d93025; display: block; }
+  .status-msg.info { background: #e8f0fe; color: #1a73e8; display: block; }
+
+  .legend {
+    display: flex;
+    gap: 15px;
+    margin-top: 15px;
+    padding: 10px 15px;
+    background: #f9fafb;
+    border-radius: 6px;
+    font-size: 12px;
+    flex-wrap: wrap;
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-color { width: 14px; height: 14px; border-radius: 3px; }
+
+  .stats-row { display: flex; gap: 15px; margin-bottom: 15px; }
+  .stat-card {
+    flex: 1;
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #e8eaed;
+    text-align: center;
+  }
+  .stat-card .stat-value { font-size: 24px; font-weight: 700; color: #1a73e8; }
+  .stat-card .stat-label { font-size: 12px; color: #888; margin-top: 4px; }
+
+  /* Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 100;
+    justify-content: center;
+    align-items: center;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    background: #fff;
+    border-radius: 12px;
+    padding: 25px;
+    width: 450px;
+    max-width: 90vw;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+  }
+  .modal h2 { font-size: 18px; margin-bottom: 20px; color: #1a73e8; }
+  .modal .form-group { margin-bottom: 15px; }
+  .modal label { display: block; font-size: 13px; color: #555; margin-bottom: 5px; font-weight: 500; }
+  .modal input, .modal select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+  }
+  .modal .form-row { display: flex; gap: 10px; }
+  .modal .form-row .form-group { flex: 1; }
+  .modal .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+
+  .github-config {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-size: 13px;
+  }
+  .github-config h4 { color: #856404; margin-bottom: 8px; }
+  .github-config p { color: #856404; line-height: 1.6; }
+  .github-config code { background: #fff; padding: 1px 5px; border-radius: 3px; font-family: monospace; }
+
+  /* 调试信息 */
+  .debug-info {
+    font-size: 11px;
+    color: #999;
+    margin-top: 5px;
+    font-family: monospace;
+  }
+
+  /* ===== 密码验证遮罩 ===== */
+  .pwd-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(135deg, #0d47a1 0%, #1a73e8 100%);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+  .pwd-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 35px 30px 28px;
+    width: 400px;
+    max-width: 92vw;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+    text-align: center;
+  }
+  .pwd-card .pwd-icon { font-size: 44px; margin-bottom: 8px; }
+  .pwd-card h2 { font-size: 20px; color: #1a73e8; margin-bottom: 6px; }
+  .pwd-card p.sub { font-size: 13px; color: #888; margin-bottom: 20px; line-height: 1.5; }
+  .pwd-card input[type="password"] {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid #ddd;
+    border-radius: 8px;
+    font-size: 15px;
+    letter-spacing: 2px;
+    transition: border-color .2s;
+  }
+  .pwd-card input[type="password"]:focus { outline: none; border-color: #1a73e8; }
+  .pwd-card .pwd-btn {
+    margin-top: 16px;
+    width: 100%;
+    padding: 11px;
+    background: #1a73e8;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .2s;
+  }
+  .pwd-card .pwd-btn:hover { background: #1558b0; }
+  .pwd-card .pwd-msg { margin-top: 12px; font-size: 13px; min-height: 18px; }
+  .pwd-card .pwd-msg.err { color: #d93025; }
+  .pwd-card .pwd-msg.info { color: #1a73e8; }
+  .pwd-footer { margin-top: 18px; font-size: 12px; color: rgba(255,255,255,0.7); }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/crypto-js@4.2.0/crypto-js.min.js"></script>
+</head>
+<body>
+
+<!-- ===== 密码验证遮罩 ===== -->
+<div class="pwd-overlay" id="pwdOverlay">
+  <div class="pwd-card">
+    <div class="pwd-icon">🔒</div>
+    <h2>HYNM 项目甘特图</h2>
+    <p class="sub">本页面仅限公司内部使用<br>请输入访问密码以查看项目数据</p>
+    <input type="password" id="pwdInput" placeholder="请输入访问密码" autocomplete="off" autofocus>
+    <button class="pwd-btn" onclick="verifyPassword()">验 证</button>
+    <div class="pwd-msg" id="pwdMsg"></div>
+  </div>
+  <div class="pwd-footer">© HYNM 项目管理 · 未授权禁止访问</div>
+</div>
+
+<div class="header" id="mainHeader" style="display:none;">
+  <div>
+    <h1>📊 HYNM项目管理在线甘特图</h1>
+    <div class="info" id="projectInfo"></div>
+  </div>
+  <div class="actions">
+    <button class="btn btn-warning btn-sm" onclick="showConfig()">⚙️ 配置</button>
+    <button class="btn btn-success btn-sm" onclick="saveToGitHub()">💾 保存修改并上传</button>
+    <button class="btn btn-primary btn-sm" onclick="exportJSON()">📥 导出JSON数据</button>
+    <button class="btn btn-primary btn-sm" onclick="importJSON()">📤 导入JSON数据</button>
+    <button class="btn btn-warning btn-sm" onclick="logout()">🔓 退出</button>
+  </div>
+</div>
+
+<div class="toolbar" id="mainToolbar" style="display:none;">
+  <label>搜索：</label>
+  <input type="text" id="searchInput" placeholder="搜索任务名称..." oninput="renderGantt()">
+  <label>阶段筛选：</label>
+  <select id="phaseFilter" onchange="renderGantt()">
+    <option value="">全部阶段</option>
+  </select>
+  <label>视图：</label>
+  <select id="viewMode" onchange="renderGantt()">
+    <option value="day">按天</option>
+    <option value="week">按周</option>
+    <option value="month">按月</option>
+  </select>
+  <span style="margin-left:auto; font-size:12px; color:#888;" id="lastUpdated"></span>
+</div>
+
+<div class="main-container" id="mainContainer" style="display:none;">
+  <div class="sidebar">
+    <div id="githubStatus"></div>
+
+    <h3>📈 项目统计</h3>
+    <div class="stats-row" style="flex-direction:column; gap:8px;">
+      <div class="stat-card" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px;">
+        <span class="stat-label" style="margin:0;">总任务数</span>
+        <span class="stat-value" id="statTotal" style="font-size:20px;">0</span>
+      </div>
+      <div class="stat-card" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px;">
+        <span class="stat-label" style="margin:0;">已完成</span>
+        <span class="stat-value" id="statDone" style="font-size:20px; color:#34a853;">0</span>
+      </div>
+      <div class="stat-card" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px;">
+        <span class="stat-label" style="margin:0;">进行中</span>
+        <span class="stat-value" id="statProgress" style="font-size:20px; color:#ff9800;">0</span>
+      </div>
+      <div class="stat-card" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px;">
+        <span class="stat-label" style="margin:0;">整体进度</span>
+        <span class="stat-value" id="statPercent" style="font-size:20px; color:#ff9800;">0%</span>
+      </div>
+    </div>
+
+    <h3 style="margin-top:20px;">➕ 添加任务</h3>
+    <div class="task-form" id="taskForm">
+      <div class="form-group">
+        <label>任务名称 *</label>
+        <input type="text" id="f_name" placeholder="输入任务名称">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>所属阶段</label>
+          <input type="text" id="f_phase" placeholder="如：开发阶段" value="开发阶段">
+        </div>
+        <div class="form-group">
+          <label>负责人</label>
+          <input type="text" id="f_owner" placeholder="负责人">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>开始日期 *</label>
+          <input type="date" id="f_start">
+        </div>
+        <div class="form-group">
+          <label>持续天数 *</label>
+          <input type="number" id="f_duration" placeholder="天数" min="1" value="5">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>完成进度：<span id="f_progress_val">0</span>%</label>
+        <input type="range" id="f_progress" min="0" max="100" value="0" oninput="document.getElementById('f_progress_val').textContent=this.value">
+      </div>
+      <div class="form-group">
+        <label>颜色</label>
+        <select id="f_color">
+          <option value="#4CAF50">绿色</option>
+          <option value="#2196F3">蓝色</option>
+          <option value="#FF9800">橙色</option>
+          <option value="#9C27B0">紫色</option>
+          <option value="#F44336">红色</option>
+          <option value="#00BCD4">青色</option>
+        </select>
+      </div>
+      <button class="btn btn-success" style="width:100%;" onclick="addTask()">添加任务</button>
+      <div class="debug-info" id="debugAdd"></div>
+    </div>
+
+    <h3>📋 任务列表</h3>
+    <div class="task-list" id="taskList"></div>
+  </div>
+
+  <div class="gantt-area" id="ganttArea"></div>
+</div>
+
+<!-- Edit Task Modal -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <h2>✏️ 编辑任务</h2>
+    <div class="form-group">
+      <label>任务名称</label>
+      <input type="text" id="e_name">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>所属阶段</label>
+        <input type="text" id="e_phase">
+      </div>
+      <div class="form-group">
+        <label>负责人</label>
+        <input type="text" id="e_owner">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>开始日期</label>
+        <input type="date" id="e_start">
+      </div>
+      <div class="form-group">
+        <label>持续天数</label>
+        <input type="number" id="e_duration" min="1">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>完成进度：<span id="e_progress_val">0</span>%</label>
+      <input type="range" id="e_progress" min="0" max="100" oninput="document.getElementById('e_progress_val').textContent=this.value">
+    </div>
+    <div class="form-group">
+      <label>颜色</label>
+      <select id="e_color">
+        <option value="#4CAF50">绿色</option>
+        <option value="#2196F3">蓝色</option>
+        <option value="#FF9800">橙色</option>
+        <option value="#9C27B0">紫色</option>
+        <option value="#F44336">红色</option>
+        <option value="#00BCD4">青色</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-warning" onclick="closeModal()">取消</button>
+      <button class="btn btn-success" onclick="saveEdit()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- GitHub Config Modal -->
+<div class="modal-overlay" id="configModal">
+  <div class="modal">
+    <h2>⚙️ GitHub 配置</h2>
+    <p style="font-size:13px; color:#666; margin-bottom:15px; line-height:1.6;">
+      配置 GitHub 信息后，可以将甘特图数据保存回仓库，实现多人协作实时更新。<br>
+      需要 <code style="background:#f0f0f0;padding:1px 4px;border-radius:2px;">repo</code> 权限的 Personal Access Token。
+    </p>
+    <div class="form-group">
+      <label>GitHub 用户名</label>
+      <input type="text" id="cfg_owner" placeholder="如：octocat">
+    </div>
+    <div class="form-group">
+      <label>仓库名称</label>
+      <input type="text" id="cfg_repo" placeholder="如：gantt-chart">
+    </div>
+    <div class="form-group">
+      <label>分支名称</label>
+      <input type="text" id="cfg_branch" placeholder="如：main" value="main">
+    </div>
+    <div class="form-group">
+      <label>Personal Access Token</label>
+      <input type="password" id="cfg_token" placeholder="ghp_xxxxxxxxxxxx">
+    </div>
+    <div class="form-group">
+      <label>数据文件路径</label>
+      <input type="text" id="cfg_path" placeholder="如：gantt-data.json" value="gantt-data.json">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-warning" onclick="closeConfig()">取消</button>
+      <button class="btn btn-success" onclick="saveConfig()">保存配置</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="fileInput" accept=".json" style="display:none;" onchange="handleImport(event)">
+
+<script>
+// ============================================================
+//  日期系统 v2 —— 基于 Ordinal（序天数），彻底消除时区问题
+//  核心思想：所有日期用 "YYYY-MM-DD" 字符串存储和传递，
+//  内部统一转为自 1970-01-01 以来的天数序号来计算差值和偏移。
+//  这样无论浏览器在什么时区，只要日期字符串正确，渲染位置就正确。
+// ============================================================
+
+// "YYYY-MM-DD" → 自 1970-01-01 的天数（与浏览器时区无关，因为用的是 UTC 方法）
+function dateStrToOrd(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return Math.floor(Date.UTC(y, m - 1, d) / 86400000);
+}
+
+// 自 1970-01-01 的天数 → "YYYY-MM-DD"
+function ordToDateStr(ord) {
+  const d = new Date(ord * 86400000);
+  const y = d.getUTCFullYear();
+  const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(d.getUTCDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+// 两个 "YYYY-MM-DD" 之间的天数差（end - start）
+function daysBetween(startStr, endStr) {
+  return dateStrToOrd(endStr) - dateStrToOrd(startStr);
+}
+
+// 给 "YYYY-MM-DD" 加 N 天，返回新的 "YYYY-MM-DD"
+function addDaysToStr(dateStr, n) {
+  return ordToDateStr(dateStrToOrd(dateStr) + n);
+}
+
+// 获取星期几（0=周日, 1=周一, ..., 6=周六）
+function getDayOfWeek(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, d)).getUTCDay();
+}
+
+// 获取某月天数
+function getDaysInMonth(year, month) {
+  return new Date(Date.UTC(year, month, 0)).getUTCDate();
+}
+
+// 格式化显示
+function formatDateCN(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return `${y}年${m}月${d}日`;
+}
+
+// 验证日期字符串合法性
+function isValidDateStr(s) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+  const [y, m, d] = s.split('-').map(Number);
+  if (m < 1 || m > 12) return false;
+  if (d < 1 || d > getDaysInMonth(y, m)) return false;
+  return ordToDateStr(dateStrToOrd(s)) === s; // 往返一致性
+}
+
+// 获取今天的日期字符串 "YYYY-MM-DD"（浏览器本地时区）
+function getTodayStr() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+// ============================================================
+//  全局状态
+// ============================================================
+let ganttData = null;
+let selectedTaskId = null;
+let editingTaskId = null;
+const todayStr = getTodayStr(); // 如 "2026-08-14"
+const todayOrd = dateStrToOrd(todayStr);
+
+// ===== 密码 / 加密配置 =====
+const ACCESS_PASSWORD = 'HYNM2026';
+const ENC_DATA_URL = 'gantt-data.enc.json'; // 加密数据文件
+const AES_KEY = CryptoJS.SHA256(ACCESS_PASSWORD).toString(); // 由密码派生 256bit 密钥
+
+// 进入页面时先显示密码遮罩；主体内容默认隐藏（CSS 中已 display:none）
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('pwdInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') verifyPassword();
+  });
+});
+
+async function verifyPassword() {
+  const input = document.getElementById('pwdInput');
+  const msg = document.getElementById('pwdMsg');
+  const pwd = input.value.trim();
+  if (!pwd) { msg.className = 'pwd-msg err'; msg.textContent = '请输入密码'; return; }
+  if (pwd !== ACCESS_PASSWORD) {
+    msg.className = 'pwd-msg err'; msg.textContent = '密码错误，请重试';
+    input.value = ''; input.focus(); return;
+  }
+  msg.className = 'pwd-msg info'; msg.textContent = '密码正确，正在解密数据…';
+  try {
+    await loadEncryptedData();
+  } catch (e) {
+    console.error(e);
+    msg.className = 'pwd-msg err'; msg.textContent = '数据加载/解密失败：' + e.message;
+    return;
+  }
+  // 验证通过：隐藏遮罩，显示主体
+  document.getElementById('pwdOverlay').style.display = 'none';
+  document.getElementById('mainHeader').style.display = '';
+  document.getElementById('mainToolbar').style.display = '';
+  document.getElementById('mainContainer').style.display = '';
+  bootstrapApp();
+}
+
+// 加载并解密数据
+async function loadEncryptedData() {
+  const params = new URLSearchParams(location.search);
+  const url = params.get('data') || ENC_DATA_URL;
+  let encrypted;
+  try {
+    const res = await fetch(url + '?t=' + Date.now());
+    if (!res.ok) throw new Error('无法加载加密数据文件');
+    encrypted = await res.text();
+  } catch (e) {
+    // 若加密文件不存在，回退到明文 gantt-data.json（首次部署兼容）
+    const res2 = await fetch('gantt-data.json?t=' + Date.now());
+    if (!res2.ok) throw new Error('未找到数据文件（需 gantt-data.enc.json 或 gantt-data.json）');
+    ganttData = await res2.json();
+    return;
+  }
+  const decrypted = decryptData(encrypted);
+  ganttData = JSON.parse(decrypted);
+}
+
+// AES-256-CBC 解密：密文格式为 base64( IV_16bytes || Ciphertext )
+// （与 gen_enc.py 的 "iv + AES256-CBC(json)" 输出对应）
+function decryptData(b64) {
+  const key = CryptoJS.enc.Hex.parse(AES_KEY);
+  const raw = CryptoJS.enc.Base64.parse(b64);
+  const rawWords = raw.words, rawSigBytes = raw.sigBytes;
+  if (rawSigBytes < 16) throw new Error('密文数据过短');
+  // 前 4 个字(16字节)为 IV，其余为密文
+  const ivWA = CryptoJS.lib.WordArray.create(rawWords.slice(0, 4), 16);
+  const ctWA = CryptoJS.lib.WordArray.create(rawWords.slice(4), rawSigBytes - 16);
+  const params = CryptoJS.lib.CipherParams.create({ ciphertext: ctWA });
+  const dec = CryptoJS.AES.decrypt(params, key, { iv: ivWA, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 });
+  const plain = dec.toString(CryptoJS.enc.Utf8);
+  if (!plain) throw new Error('解密失败，可能密码不正确或数据文件不匹配');
+  return plain;
+}
+
+// AES-256-CBC 加密：返回 base64( IV_16bytes || Ciphertext )
+function encryptData(jsonStr) {
+  const key = CryptoJS.enc.Hex.parse(AES_KEY);
+  const ivWA = CryptoJS.lib.WordArray.random(16);
+  const enc = CryptoJS.AES.encrypt(jsonStr, key, { iv: ivWA, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 });
+  // enc.ciphertext 为密文 WordArray；与 IV 拼接后 base64
+  const ivWords = ivWA.words.slice(0, 4);
+  const ctWords = enc.ciphertext.words;
+  const combined = CryptoJS.lib.WordArray.create(ivWords.concat(ctWords), 16 + enc.ciphertext.sigBytes);
+  return CryptoJS.enc.Base64.stringify(combined);
+}
+
+// 登出：清除内存数据，回到密码页
+function logout() {
+  ganttData = null;
+  document.getElementById('pwdOverlay').style.display = '';
+  document.getElementById('mainHeader').style.display = 'none';
+  document.getElementById('mainToolbar').style.display = 'none';
+  document.getElementById('mainContainer').style.display = 'none';
+  document.getElementById('pwdInput').value = '';
+  document.getElementById('pwdMsg').className = 'pwd-msg';
+  document.getElementById('pwdMsg').textContent = '已退出，请重新输入密码';
+  document.getElementById('ganttArea').innerHTML = '';
+}
+
+// ============================================================
+//  初始化（密码验证通过后调用）
+// ============================================================
+function bootstrapApp() {
+  // 加载 GitHub 配置
+  const saved = localStorage.getItem('github_config');
+  if (saved) {
+    const cfg = JSON.parse(saved);
+    document.getElementById('cfg_owner').value = cfg.owner || '';
+    document.getElementById('cfg_repo').value = cfg.repo || '';
+    document.getElementById('cfg_branch').value = cfg.branch || 'main';
+    document.getElementById('cfg_token').value = cfg.token || '';
+    document.getElementById('cfg_path').value = cfg.path || 'gantt-data.enc.json';
+    showStatus('githubStatus', '✅ GitHub 已配置，可以保存到仓库', 'success');
+  } else {
+    showStatus('githubStatus', '⚠️ 未配置 GitHub，数据仅保存在本地。点击右上角「配置GitHub」开启协作功能。', 'info');
+  }
+  // 设置默认日期为今天
+  document.getElementById('f_start').value = todayStr;
+  renderAll();
+}
+
+function getDefaultData() {
+  return {
+    project: { name: '我的项目', manager: '未设置', startDate: '2026-08-01', endDate: '2099-12-31' },
+    tasks: [
+      { id: 1, phase: '启动阶段', name: '项目立项', owner: '张三', start: '2026-08-01', duration: 3, progress: 100, color: '#4CAF50' },
+      { id: 2, phase: '启动阶段', name: '需求调研', owner: '李四', start: '2026-08-04', duration: 5, progress: 80, color: '#4CAF50' },
+      { id: 3, phase: '设计阶段', name: 'UI设计', owner: '王五', start: '2026-08-09', duration: 7, progress: 40, color: '#2196F3' },
+      { id: 4, phase: '设计阶段', name: '架构设计', owner: '赵六', start: '2026-08-09', duration: 5, progress: 60, color: '#2196F3' },
+      { id: 5, phase: '开发阶段', name: '前端开发', owner: '王五', start: '2026-08-16', duration: 10, progress: 10, color: '#FF9800' },
+      { id: 6, phase: '开发阶段', name: '后端开发', owner: '赵六', start: '2026-08-16', duration: 12, progress: 5, color: '#FF9800' },
+      { id: 7, phase: '测试阶段', name: '集成测试', owner: '李四', start: '2026-08-28', duration: 5, progress: 0, color: '#9C27B0' },
+      { id: 8, phase: '测试阶段', name: '验收测试', owner: '张三', start: '2026-09-02', duration: 5, progress: 0, color: '#9C27B0' },
+      { id: 9, phase: '上线阶段', name: '部署上线', owner: '赵六', start: '2026-09-07', duration: 3, progress: 0, color: '#F44336' },
+      { id: 10, phase: '上线阶段', name: '项目总结', owner: '张三', start: '2026-09-10', duration: 5, progress: 0, color: '#F44336' }
+    ]
+  };
+}
+
+// ============================================================
+//  渲染总入口
+// ============================================================
+function renderAll() {
+  renderProjectInfo();
+  renderStats();
+  renderPhaseFilter();
+  renderTaskList();
+  renderGantt();
+  renderLastUpdated();
+}
+
+function renderProjectInfo() {
+  const p = ganttData.project;
+  document.getElementById('projectInfo').textContent =
+    `${p.name} | 负责人：${p.manager} | ${p.startDate} ~ ${p.endDate}`;
+}
+
+function renderStats() {
+  const tasks = ganttData.tasks;
+  const total = tasks.length;
+  const done = tasks.filter(t => t.progress >= 100).length;
+  const inProgress = tasks.filter(t => t.progress > 0 && t.progress < 100).length;
+  const avgProgress = total > 0 ? Math.round(tasks.reduce((s, t) => s + t.progress, 0) / total) : 0;
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statDone').textContent = done;
+  document.getElementById('statProgress').textContent = inProgress;
+  document.getElementById('statPercent').textContent = avgProgress + '%';
+}
+
+function renderPhaseFilter() {
+  const sel = document.getElementById('phaseFilter');
+  const current = sel.value;
+  const phases = [...new Set(ganttData.tasks.map(t => t.phase))];
+  sel.innerHTML = '<option value="">全部阶段</option>' +
+    phases.map(p => `<option value="${p}">${p}</option>`).join('');
+  sel.value = current;
+}
+
+function renderTaskList() {
+  const container = document.getElementById('taskList');
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const phase = document.getElementById('phaseFilter').value;
+  let tasks = ganttData.tasks.filter(t => {
+    const matchSearch = !search || t.name.toLowerCase().includes(search);
+    const matchPhase = !phase || t.phase === phase;
+    return matchSearch && matchPhase;
+  });
+  container.innerHTML = tasks.map(t => {
+    const endStr = addDaysToStr(t.start, t.duration - 1);
+    return `
+    <div class="task-item ${selectedTaskId === t.id ? 'selected' : ''}" onclick="selectTask(${t.id})" ondblclick="openEdit(${t.id})">
+      <button class="delete-btn" onclick="event.stopPropagation(); deleteTask(${t.id})">✕</button>
+      <div class="task-name">${t.name}</div>
+      <div class="task-meta">
+        <span>${t.phase}</span>
+        <span>👤 ${t.owner}</span>
+        <span>📅 ${t.start} ~ ${endStr}</span>
+      </div>
+      <div class="task-progress-bar">
+        <div class="task-progress-fill" style="width:${t.progress}%; background:${t.color};"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderLastUpdated() {
+  document.getElementById('lastUpdated').textContent =
+    '最后更新：' + new Date().toLocaleString('zh-CN');
+}
+
+// ============================================================
+//  甘特图核心渲染
+// ============================================================
+function renderGantt() {
+  const area = document.getElementById('ganttArea');
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const phase = document.getElementById('phaseFilter').value;
+  const view = document.getElementById('viewMode').value;
+
+  let tasks = ganttData.tasks.filter(t => {
+    const matchSearch = !search || t.name.toLowerCase().includes(search);
+    const matchPhase = !phase || t.phase === phase;
+    return matchSearch && matchPhase;
+  });
+
+  // 按阶段分组
+  const phaseOrder = [];
+  const phases = {};
+  tasks.forEach(t => {
+    if (!phases[t.phase]) { phases[t.phase] = []; phaseOrder.push(t.phase); }
+    phases[t.phase].push(t);
+  });
+
+  // ===== 计算日期范围（全部用 ordinal） =====
+  let rangeStartOrd, rangeEndOrd;
+  if (tasks.length > 0) {
+    const allOrds = tasks.map(t => dateStrToOrd(t.start));
+    rangeStartOrd = Math.min(...allOrds);
+    rangeEndOrd = Math.max(...allOrds);
+    tasks.forEach(t => {
+      const endOrd = dateStrToOrd(t.start) + t.duration - 1;
+      if (endOrd > rangeEndOrd) rangeEndOrd = endOrd;
+    });
+  } else {
+    rangeStartOrd = dateStrToOrd(ganttData.project.startDate || '2026-01-01');
+    rangeEndOrd = dateStrToOrd(ganttData.project.endDate || '2026-12-31');
+  }
+
+  // 统一用 dayWidth=28 作为基础单位
+  const dayWidth = 28;
+
+  // 视图分发
+  let html = '';
+  const colors = [...new Set(tasks.map(t => t.color))];
+  html += '<div class="legend">';
+  html += '<span style="font-weight:600; margin-right:5px;">图例：</span>';
+  const colorMap = { '#4CAF50':'启动/完成','#2196F3':'设计','#FF9800':'开发','#9C27B0':'测试','#F44336':'上线','#00BCD4':'其他' };
+  colors.forEach(c => { html += `<div class="legend-item"><div class="legend-color" style="background:${c}"></div>${colorMap[c]||c}</div>`; });
+  html += '<div class="legend-item" style="margin-left:auto;"><div class="legend-color" style="background:#f44336; width:2px; height:14px;"></div>今日</div>';
+  html += '</div>';
+
+  if (view === 'month') {
+    html += renderMonthView(phaseOrder, phases, rangeStartOrd, rangeEndOrd, dayWidth);
+  } else if (view === 'week') {
+    html += renderWeekView(phaseOrder, phases, rangeStartOrd, rangeEndOrd, dayWidth);
+  } else {
+    html += renderDayView(phaseOrder, phases, rangeStartOrd, rangeEndOrd, dayWidth);
+  }
+
+  area.innerHTML = html;
+}
+
+// ===== 按天视图 =====
+function renderDayView(phaseOrder, phases, rangeStartOrd, rangeEndOrd, dayWidth) {
+  // 左侧留 2 天余量，右侧留 5 天余量
+  const viewStartOrd = rangeStartOrd - 2;
+  const viewEndOrd = rangeEndOrd + 5;
+  const totalDays = viewEndOrd - viewStartOrd + 1;
+  const timelineWidth = totalDays * dayWidth;
+
+  let html = '';
+
+  // 表头
+  html += '<div class="gantt-header-row">';
+  html += '<div class="gantt-task-label-header">任务</div>';
+  html += `<div class="gantt-timeline-header" style="width:${timelineWidth}px;">`;
+  for (let i = 0; i < totalDays; i++) {
+    const ord = viewStartOrd + i;
+    const dateStr = ordToDateStr(ord);
+    const [y, m, d] = dateStr.split('-').map(Number);
+    const dow = getDayOfWeek(dateStr);
+    const isWeekend = dow === 0 || dow === 6;
+    const isToday = ord === todayOrd;
+    const dayName = ['日','一','二','三','四','五','六'][dow];
+    html += `<div class="gantt-day-header${isWeekend?' weekend':''}${isToday?' today':''}" style="width:${dayWidth}px;">`;
+    html += `<div class="day-num">${d}</div>`;
+    html += `<div class="day-name">${dayName}</div>`;
+    html += `</div>`;
+  }
+  html += '</div></div>';
+
+  // 主体
+  html += '<div class="gantt-body" style="position:relative;">';
+
+  // 今日线
+  const todayRelPos = todayOrd - viewStartOrd;
+  if (todayRelPos >= 0 && todayRelPos < totalDays) {
+    html += `<div class="gantt-today-line" style="left:${150 + todayRelPos * dayWidth}px;"></div>`;
+  }
+
+  // 网格线 + 周末背景
+  for (let i = 0; i < totalDays; i++) {
+    const ord = viewStartOrd + i;
+    const left = 150 + i * dayWidth;
+    const dow = getDayOfWeek(ordToDateStr(ord));
+    if (dow === 0 || dow === 6) {
+      html += `<div style="position:absolute;top:0;bottom:0;left:${left}px;width:${dayWidth*2}px;background:rgba(0,0,0,0.02);pointer-events:none;"></div>`;
+    }
+    html += `<div class="gantt-grid-line" style="left:${left}px;"></div>`;
+  }
+
+  // 任务条
+  // 🔧 修复：gantt-bar-wrapper 的 containing block 是 gantt-bar-area（position:relative），
+  // 而 gantt-bar-area 在 gantt-row 中已经从 150px 处开始。
+  // 所以 left 只需相对于 gantt-bar-area 左边缘计算，不需要再加 150px。
+  phaseOrder.forEach(phaseName => {
+    html += `<div class="phase-separator">📌 ${phaseName}</div>`;
+    phases[phaseName].forEach(task => {
+      const startOrd = dateStrToOrd(task.start);
+      const offsetDays = startOrd - viewStartOrd;
+      const left = offsetDays * dayWidth; // 🔧 去掉了多余的 +150
+      const width = task.duration * dayWidth - 4;
+      const progressWidth = Math.round((task.progress / 100) * width);
+      const endStr = addDaysToStr(task.start, task.duration - 1);
+      const tooltip = `${task.name} | ${task.progress}% | ${task.start} ~ ${endStr}`;
+
+      html += `<div class="gantt-row" ondblclick="openEdit(${task.id})" title="${tooltip}">`;
+      html += `<div class="gantt-task-label">`;
+      html += `<div class="label-name">${task.name}</div>`;
+      html += `<div class="label-owner">${task.owner} | ${task.duration}天 | ${task.progress}%</div>`;
+      html += `</div>`;
+      html += `<div class="gantt-bar-area" style="width:${timelineWidth}px;">`;
+      html += `<div class="gantt-bar-wrapper" style="left:${left}px;width:${width}px;" title="${tooltip}">`;
+      html += `<div class="gantt-bar-bg" style="background:${task.color};width:${width}px;"></div>`;
+      html += `<div class="gantt-bar-progress" style="width:${progressWidth}px;background:${task.color};opacity:0.85;"></div>`;
+      html += `<div class="gantt-bar-label">${task.name}</div>`;
+      html += `</div></div></div>`;
+    });
+  });
+
+  html += '</div>';
+  return html;
+}
+
+// ===== 按周视图 =====
+function renderWeekView(phaseOrder, phases, rangeStartOrd, rangeEndOrd, dayWidth) {
+  const viewStartOrd = rangeStartOrd - 2;
+  const viewEndOrd = rangeEndOrd + 5;
+  const totalDays = viewEndOrd - viewStartOrd + 1;
+  const timelineWidth = totalDays * dayWidth;
+
+  let html = '';
+
+  // 表头（按周分组）
+  html += '<div class="gantt-header-row">';
+  html += '<div class="gantt-task-label-header">任务</div>';
+  html += `<div class="gantt-timeline-header" style="width:${timelineWidth}px;">`;
+
+  // 找到第一个周一作为周起始
+  let firstWeekStart = viewStartOrd;
+  while (getDayOfWeek(ordToDateStr(firstWeekStart)) !== 1) {
+    firstWeekStart++;
+  }
+
+  for (let ord = firstWeekStart; ord <= viewEndOrd; ord += 7) {
+    const weekStartStr = ordToDateStr(ord);
+    const weekEndStr = ordToDateStr(ord + 6);
+    const [sy, sm, sd] = weekStartStr.split('-').map(Number);
+    const [ey, em, ed] = weekEndStr.split('-').map(Number);
+    const isCurrentWeek = ord <= todayOrd && todayOrd <= ord + 6;
+    const wLeft = (ord - viewStartOrd) * dayWidth;
+    html += `<div style="width:${dayWidth*7}px;text-align:center;font-size:11px;font-weight:600;color:#555;padding:5px 0;${isCurrentWeek?'background:#e8f0fe;':''}">`;
+    html += `${sm}/${sd} ~ ${em}/${ed}`;
+    html += `</div>`;
+  }
+  html += '</div></div>';
+
+  // 主体（用天级精度渲染条）
+  html += '<div class="gantt-body" style="position:relative;">';
+
+  const todayRelPos = todayOrd - viewStartOrd;
+  if (todayRelPos >= 0 && todayRelPos < totalDays) {
+    html += `<div class="gantt-today-line" style="left:${150 + todayRelPos * dayWidth}px;"></div>`;
+  }
+
+  for (let i = 0; i < totalDays; i++) {
+    const ord = viewStartOrd + i;
+    const left = 150 + i * dayWidth;
+    const dow = getDayOfWeek(ordToDateStr(ord));
+    if (dow === 0 || dow === 6) {
+      html += `<div style="position:absolute;top:0;bottom:0;left:${left}px;width:${dayWidth*2}px;background:rgba(0,0,0,0.02);pointer-events:none;"></div>`;
+    }
+    html += `<div class="gantt-grid-line" style="left:${left}px;"></div>`;
+  }
+
+  phaseOrder.forEach(phaseName => {
+    html += `<div class="phase-separator">📌 ${phaseName}</div>`;
+    phases[phaseName].forEach(task => {
+      const startOrd = dateStrToOrd(task.start);
+      const offsetDays = startOrd - viewStartOrd;
+      const left = offsetDays * dayWidth; // 🔧 去掉了多余的 +150
+      const width = task.duration * dayWidth - 4;
+      const progressWidth = Math.round((task.progress / 100) * width);
+      const endStr = addDaysToStr(task.start, task.duration - 1);
+      const tooltip = `${task.name} | ${task.progress}% | ${task.start} ~ ${endStr}`;
+
+      html += `<div class="gantt-row" ondblclick="openEdit(${task.id})" title="${tooltip}">`;
+      html += `<div class="gantt-task-label"><div class="label-name">${task.name}</div>`;
+      html += `<div class="label-owner">${task.owner} | ${task.duration}天 | ${task.progress}%</div></div>`;
+      html += `<div class="gantt-bar-area" style="width:${timelineWidth}px;">`;
+      html += `<div class="gantt-bar-wrapper" style="left:${left}px;width:${width}px;" title="${tooltip}">`;
+      html += `<div class="gantt-bar-bg" style="background:${task.color};width:${width}px;"></div>`;
+      html += `<div class="gantt-bar-progress" style="width:${progressWidth}px;background:${task.color};opacity:0.85;"></div>`;
+      html += `<div class="gantt-bar-label">${task.name}</div></div></div></div>`;
+    });
+  });
+
+  html += '</div>';
+  return html;
+}
+
+// ===== 按月视图 =====
+function renderMonthView(phaseOrder, phases, rangeStartOrd, rangeEndOrd, baseDayWidth) {
+  // 确定年月范围
+  const startDate = ordToDateStr(rangeStartOrd);
+  const endDate = ordToDateStr(rangeEndOrd);
+  const [startY, startM] = startDate.split('-').map(Number);
+  const [endY, endM] = endDate.split('-').map(Number);
+
+  const monthWidth = 120; // 每月列宽
+  const totalMonths = (endY - startY) * 12 + (endM - startM) + 1;
+  const timelineWidth = totalMonths * monthWidth;
+
+  let html = '';
+
+  // 年份行
+  html += '<div class="gantt-header-row">';
+  html += '<div class="gantt-task-label-header">任务</div>';
+  html += `<div class="gantt-timeline-header" style="width:${timelineWidth}px;">`;
+
+  // 按年分组
+  const yearSpans = {};
+  for (let i = 0; i < totalMonths; i++) {
+    const yr = startY + Math.floor((startM - 1 + i) / 12);
+    yearSpans[yr] = (yearSpans[yr] || 0) + 1;
+  }
+  Object.keys(yearSpans).sort().forEach(yr => {
+    const span = yearSpans[yr];
+    const isCurrentYear = parseInt(yr) === todayOrd > 0; // not used directly
+    html += `<div class="gantt-year-header" style="width:${span * monthWidth}px;">${yr}年</div>`;
+  });
+  html += '</div></div>';
+
+  // 月份行
+  html += '<div class="gantt-header-row">';
+  html += '<div class="gantt-task-label-header"></div>';
+  html += `<div class="gantt-timeline-header" style="width:${timelineWidth}px;">`;
+  for (let i = 0; i < totalMonths; i++) {
+    const monthIdx = startM - 1 + i;
+    const yr = startY + Math.floor(monthIdx / 12);
+    const mo = (monthIdx % 12) + 1;
+    const isCurrentMonth = yr === todayStr.split('-').map(Number)[0] && mo === todayStr.split('-').map(Number)[1];
+    html += `<div class="gantt-month-header" style="width:${monthWidth}px;${isCurrentMonth?'background:#1a73e8;color:#fff;':''}">${mo}月</div>`;
+  }
+  html += '</div></div>';
+
+  // 主体
+  html += '<div class="gantt-body" style="position:relative;">';
+
+  // 今日线（在按月视图中近似定位）
+  const todayParts = todayStr.split('-').map(Number);
+  const todayMonthIdx = (todayParts[0] - startY) * 12 + (todayParts[1] - startM);
+  const daysInTodayMonth = getDaysInMonth(todayParts[0], todayParts[1]);
+  const todayInMonthRatio = (todayParts[2] - 1) / daysInTodayMonth;
+  const todayLeft = 150 + (todayMonthIdx + todayInMonthRatio) * monthWidth;
+  if (todayMonthIdx >= 0 && todayMonthIdx < totalMonths) {
+    html += `<div class="gantt-today-line" style="left:${todayLeft}px;"></div>`;
+  }
+
+  // 月份分隔线
+  for (let i = 0; i <= totalMonths; i++) {
+    const left = 150 + i * monthWidth;
+    html += `<div class="gantt-grid-line" style="left:${left}px;border-left:1px solid #e8e8e8;"></div>`;
+  }
+
+  // 任务条
+  // 🔧 修复：gantt-bar-wrapper 的 containing block 是 gantt-bar-area（position:relative），
+  // 而 gantt-bar-area 在 gantt-row 中已经从 150px 处开始，所以 left 不需要再加 150。
+  phaseOrder.forEach(phaseName => {
+    html += `<div class="phase-separator">📌 ${phaseName}</div>`;
+    phases[phaseName].forEach(task => {
+      const [ty, tm, td] = task.start.split('-').map(Number);
+      const monthsFromStart = (ty - startY) * 12 + (tm - startM);
+      const daysInTaskMonth = getDaysInMonth(ty, tm);
+      const intraMonthRatio = (td - 1) / daysInTaskMonth;
+      const left = (monthsFromStart + intraMonthRatio) * monthWidth; // 🔧 去掉了多余的 +150
+
+      // 持续时间转换为月宽度的近似
+      const durationMonths = task.duration / daysInTaskMonth;
+      const width = Math.max(monthWidth * durationMonths - 2, 8);
+
+      const progressWidth = Math.round((task.progress / 100) * width);
+      const endStr = addDaysToStr(task.start, task.duration - 1);
+      const tooltip = `${task.name} | ${task.progress}% | ${task.start} ~ ${endStr}`;
+
+      html += `<div class="gantt-row" ondblclick="openEdit(${task.id})" title="${tooltip}">`;
+      html += `<div class="gantt-task-label"><div class="label-name">${task.name}</div>`;
+      html += `<div class="label-owner">${task.owner} | ${task.duration}天 | ${task.progress}%</div></div>`;
+      html += `<div class="gantt-bar-area" style="width:${timelineWidth}px;">`;
+      html += `<div class="gantt-bar-wrapper" style="left:${left}px;width:${width}px;" title="${tooltip}">`;
+      html += `<div class="gantt-bar-bg" style="background:${task.color};width:${width}px;"></div>`;
+      html += `<div class="gantt-bar-progress" style="width:${progressWidth}px;background:${task.color};opacity:0.85;"></div>`;
+      html += `<div class="gantt-bar-label">${task.name}</div></div></div></div>`;
+    });
+  });
+
+  html += '</div>';
+  return html;
+}
+
+// ============================================================
+//  任务操作
+// ============================================================
+function selectTask(id) {
+  selectedTaskId = id;
+  renderTaskList();
+}
+
+function addTask() {
+  const name = document.getElementById('f_name').value.trim();
+  const startVal = document.getElementById('f_start').value;
+  const duration = parseInt(document.getElementById('f_duration').value) || 1;
+
+  if (!name || !startVal) {
+    alert('请填写任务名称和开始日期');
+    return;
+  }
+  if (!isValidDateStr(startVal)) {
+    alert('请选择有效的开始日期（格式：YYYY-MM-DD）');
+    return;
+  }
+
+  // 验证：转换回字符串应一致
+  const startOrd = dateStrToOrd(startVal);
+  const roundTrip = ordToDateStr(startOrd);
+  if (roundTrip !== startVal) {
+    alert(`日期解析异常：${startVal} → ${roundTrip}，请检查输入`);
+    return;
+  }
+
+  const newId = ganttData.tasks.length > 0
+    ? Math.max(...ganttData.tasks.map(t => t.id)) + 1 : 1;
+
+  const newTask = {
+    id: newId,
+    phase: document.getElementById('f_phase').value || '未分类',
+    name: name,
+    owner: document.getElementById('f_owner').value || '未分配',
+    start: startVal,
+    duration: duration,
+    progress: parseInt(document.getElementById('f_progress').value) || 0,
+    color: document.getElementById('f_color').value || '#4CAF50'
+  };
+
+  // 计算结束日期用于确认
+  const endStr = addDaysToStr(newTask.start, newTask.duration - 1);
+
+  ganttData.tasks.push(newTask);
+
+  // 清空表单
+  document.getElementById('f_name').value = '';
+  document.getElementById('f_progress').value = '0';
+  document.getElementById('f_progress_val').textContent = '0';
+  document.getElementById('f_start').value = todayStr;
+
+  // 调试信息
+  document.getElementById('debugAdd').textContent =
+    `✓ 已添加: ${newTask.start} ~ ${endStr} (${newTask.duration}天)`;
+
+  renderAll();
+  showStatus('githubStatus', `✅ 任务「${name}」已添加（${newTask.start} ~ ${endStr}）`, 'success');
+  setTimeout(() => showStatus('githubStatus', ''), 4000);
+}
+
+function deleteTask(id) {
+  if (!confirm('确定删除这个任务吗？')) return;
+  ganttData.tasks = ganttData.tasks.filter(t => t.id !== id);
+  renderAll();
+}
+
+function openEdit(id) {
+  const task = ganttData.tasks.find(t => t.id === id);
+  if (!task) return;
+  editingTaskId = id;
+  document.getElementById('e_name').value = task.name;
+  document.getElementById('e_phase').value = task.phase;
+  document.getElementById('e_owner').value = task.owner;
+  document.getElementById('e_start').value = task.start;
+  document.getElementById('e_duration').value = task.duration;
+  document.getElementById('e_progress').value = task.progress;
+  document.getElementById('e_progress_val').textContent = task.progress;
+  document.getElementById('e_color').value = task.color;
+  document.getElementById('editModal').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('editModal').classList.remove('active');
+  editingTaskId = null;
+}
+
+function saveEdit() {
+  const task = ganttData.tasks.find(t => t.id === editingTaskId);
+  if (!task) return;
+
+  const newStart = document.getElementById('e_start').value;
+  if (!isValidDateStr(newStart)) { alert('日期格式无效'); return; }
+
+  task.name = document.getElementById('e_name').value;
+  task.phase = document.getElementById('e_phase').value;
+  task.owner = document.getElementById('e_owner').value;
+  task.start = newStart;
+  task.duration = parseInt(document.getElementById('e_duration').value) || 1;
+  task.progress = parseInt(document.getElementById('e_progress').value) || 0;
+  task.color = document.getElementById('e_color').value;
+
+  const endStr = addDaysToStr(task.start, task.duration - 1);
+  showStatus('githubStatus', `✅ 已更新：${task.start} ~ ${endStr}`, 'success');
+  setTimeout(() => showStatus('githubStatus', ''), 3000);
+
+  closeModal();
+  renderAll();
+}
+
+// ============================================================
+//  GitHub 配置 & 保存
+// ============================================================
+function showConfig() { document.getElementById('configModal').classList.add('active'); }
+function closeConfig() { document.getElementById('configModal').classList.remove('active'); }
+
+function saveConfig() {
+  const cfg = {
+    owner: document.getElementById('cfg_owner').value.trim(),
+    repo: document.getElementById('cfg_repo').value.trim(),
+    branch: document.getElementById('cfg_branch').value.trim() || 'main',
+    token: document.getElementById('cfg_token').value.trim(),
+    path: document.getElementById('cfg_path').value.trim() || 'gantt-data.enc.json'
+  };
+  localStorage.setItem('github_config', JSON.stringify(cfg));
+  closeConfig();
+  showStatus('githubStatus', '✅ GitHub 配置已保存', 'success');
+  setTimeout(() => renderAll(), 1000);
+}
+
+async function saveToGitHub() {
+  const saved = localStorage.getItem('github_config');
+  if (!saved) { showStatus('githubStatus', '⚠️ 请先配置 GitHub 信息', 'error'); showConfig(); return; }
+  const cfg = JSON.parse(saved);
+  if (!cfg.token || !cfg.owner || !cfg.repo) { showStatus('githubStatus', '⚠️ GitHub 配置不完整', 'error'); return; }
+
+  showStatus('githubStatus', '⏳ 正在保存到 GitHub...', 'info');
+  try {
+    const apiUrl = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.path}`;
+    const getRes = await fetch(apiUrl + '?ref=' + cfg.branch, {
+      headers: { 'Authorization': 'token ' + cfg.token }
+    });
+    let sha = null;
+    if (getRes.ok) sha = (await getRes.json()).sha;
+
+    const content = encryptData(JSON.stringify(ganttData, null, 2));
+    const encoded = btoa(content);
+
+    const putRes = await fetch(apiUrl, {
+      method: 'PUT',
+      headers: { 'Authorization': 'token ' + cfg.token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: '更新甘特图数据 - ' + new Date().toLocaleString('zh-CN'),
+        content: encoded,
+        branch: cfg.branch,
+        sha: sha
+      })
+    });
+    if (!putRes.ok) throw new Error((await putRes.json()).message || '保存失败');
+    showStatus('githubStatus', '✅ 已成功保存到 GitHub！', 'success');
+    renderLastUpdated();
+  } catch (e) {
+    showStatus('githubStatus', '❌ 保存失败：' + e.message, 'error');
+  }
+}
+
+// ============================================================
+//  导入/导出
+// ============================================================
+function exportJSON() {
+  // 导出明文 JSON（方便本地备份/迁移），部署到 GitHub 时仍为加密文件
+  const data = JSON.stringify(ganttData, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'gantt-data.json'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importJSON() { document.getElementById('fileInput').click(); }
+
+function handleImport(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      const txt = ev.target.result;
+      // 支持导入明文 JSON（.json）或加密文件（.enc.json / 含 U2F 等密文特征）
+      let parsed;
+      try { parsed = JSON.parse(txt); }
+      catch (parseErr) { throw new Error('文件不是合法的 JSON 数据'); }
+      ganttData = parsed;
+      renderAll();
+      showStatus('githubStatus', '✅ 数据导入成功（明文），保存上传时将自动加密', 'success');
+      setTimeout(() => showStatus('githubStatus', ''), 4000);
+    } catch (err) {
+      showStatus('githubStatus', '❌ 导入失败：' + err.message, 'error');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ============================================================
+//  工具函数
+// ============================================================
+function showStatus(elementId, msg, type) {
+  const el = document.getElementById(elementId);
+  if (!msg) { el.innerHTML = ''; return; }
+  el.innerHTML = `<div class="status-msg ${type}">${msg}</div>`;
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') { closeModal(); closeConfig(); }
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveToGitHub(); }
+});
+
+// ============================================================
+//  启动
+// ============================================================
+// 不再自动 init：必须先通过密码验证（见 verifyPassword -> bootstrapApp）
+// init();
+</script>
+</body>
+</html>
