@@ -7,36 +7,6 @@
   },
   "tasks": [
     {
-      "id": 1,
-      "phase": "启动阶段",
-      "name": "偶像练习生",
-      "owner": "KUN",
-      "start": "2026-07-25",
-      "duration": 4,
-      "progress": 100,
-      "color": "#4CAF50"
-    },
-    {
-      "id": 2,
-      "phase": "启动阶段",
-      "name": "全民制作人",
-      "owner": "ikun",
-      "start": "2026-08-04",
-      "duration": 3,
-      "progress": 80,
-      "color": "#00BCD4"
-    },
-    {
-      "id": 3,
-      "phase": "设计阶段",
-      "name": "中分",
-      "owner": "KUN",
-      "start": "2026-08-07",
-      "duration": 7,
-      "progress": 40,
-      "color": "#2196F3"
-    },
-    {
       "id": 4,
       "phase": "设计阶段",
       "name": "背带裤",
