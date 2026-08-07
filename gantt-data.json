@@ -7,76 +7,6 @@
   },
   "tasks": [
     {
-      "id": 4,
-      "phase": "设计阶段",
-      "name": "背带裤",
-      "owner": "KUN",
-      "start": "2026-08-09",
-      "duration": 5,
-      "progress": 60,
-      "color": "#2196F3"
-    },
-    {
-      "id": 5,
-      "phase": "开发阶段",
-      "name": "唱",
-      "owner": "KUN",
-      "start": "2026-08-13",
-      "duration": 10,
-      "progress": 10,
-      "color": "#FF9800"
-    },
-    {
-      "id": 6,
-      "phase": "开发阶段",
-      "name": "跳",
-      "owner": "KUN",
-      "start": "2026-08-14",
-      "duration": 12,
-      "progress": 5,
-      "color": "#FF9800"
-    },
-    {
-      "id": 7,
-      "phase": "开发阶段",
-      "name": "RAP",
-      "owner": "KUN",
-      "start": "2026-08-15",
-      "duration": 5,
-      "progress": 35,
-      "color": "#9C27B0"
-    },
-    {
-      "id": 8,
-      "phase": "开发阶段",
-      "name": "篮球",
-      "owner": "KUN",
-      "start": "2026-08-17",
-      "duration": 5,
-      "progress": 29,
-      "color": "#9C27B0"
-    },
-    {
-      "id": 9,
-      "phase": "上线阶段",
-      "name": "music",
-      "owner": "全民制作人",
-      "start": "2026-08-24",
-      "duration": 3,
-      "progress": 64,
-      "color": "#F44336"
-    },
-    {
-      "id": 10,
-      "phase": "上线阶段",
-      "name": "➕👁👉💥",
-      "owner": "iKUN",
-      "start": "2026-08-26",
-      "duration": 8,
-      "progress": 36,
-      "color": "#F44336"
-    },
-    {
       "id": 11,
       "phase": "开发阶段",
       "name": "烧结",
@@ -85,6 +15,16 @@
       "duration": 5,
       "progress": 18,
       "color": "#4CAF50"
+    },
+    {
+      "id": 12,
+      "phase": "随便自定义阶段",
+      "name": "任务L",
+      "owner": "Tsui",
+      "start": "2026-07-28",
+      "duration": 12,
+      "progress": 56,
+      "color": "#2196F3"
     }
   ]
 }
